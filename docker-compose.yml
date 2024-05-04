@@ -1,0 +1,10 @@
+version: "3"
+services:
+  laundry-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - static-volume:./data
+volumes:
+  static-volume:
