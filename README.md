@@ -25,7 +25,7 @@ git clone https://github.com/jloh02/capt-laundry-bot
 2. Create a `.env` file in root folder with the following content and update Telegram bot API key
 
 ```
-
+TELEGRAM_BOT_API_KEY=<YOUR_API_KEY>
 ```
 
 3. Install Packages
@@ -38,6 +38,15 @@ pip install -r requirements.txt
 
 ```
 python src/main.py
+```
+
+### Testing Deployment Configurations
+
+Ensure you have docker installed
+
+```
+docker compose build
+docker compose up -d
 ```
 
 ## Design Considerations

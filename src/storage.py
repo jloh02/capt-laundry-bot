@@ -20,8 +20,10 @@ def read():
 
 def write():
     global data_cache
-    if not os.path.isfile(get_timer_path()):
-        os.makedirs(os.path.dirname(get_timer_path()))
+    
+    dir = os.path.dirname(get_timer_path())
+    if not os.path.isdir(dir):
+        os.makedirs(dir)
 
     with open(get_timer_path(), "w") as f:
         json.dump(data_cache, f)
