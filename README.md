@@ -1,6 +1,6 @@
 # CAPT Laundry Bot
 
-Laundry bot for the management of
+Laundry bot for the management of laundry timers in CAPT
 
 ## Setup
 
