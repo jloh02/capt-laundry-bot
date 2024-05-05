@@ -107,14 +107,6 @@ START_INLINE_KEYBOARD = InlineKeyboardMarkup(
 
 
 async def start(update: Update, context: CallbackContext):
-    # Don't allow users to use /start command in group chats
-    if update.message.chat.type != "private":
-        TBOT.send_message(
-            chat_id=update.message.from_user.id,
-            text=f"Hi @{update.message.from_user.username},\n\nThanks for calling me in the groupchat. To prevent spamming in the group, please type /start to me privately in this chat instead!",
-        )
-        return MENU
-
     if len(context.args) > 0:
         return
 
@@ -269,13 +261,6 @@ Washer One: {WASHER_ONE_TIMER}
   
 Washer Two: {WASHER_TWO_TIMER}"""
 
-    # Don't allow users to use /status command in group chats
-    if update.message.chat.type != "private":
-        TBOT.send_message(
-            chat_id=update.message.from_user.id,
-            text=f"""Hi @{update.message.from_user.username} ,thanks for calling me in the groupchat. \n\nTo prevent spamming in the group, I have sent you a private message instead!\n\n{reply_text}""",
-        )
-        return MENU
     await update.message.reply_text(reply_text)
 
 
