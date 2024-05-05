@@ -11,6 +11,7 @@ class Machine(ABC):
     # constant value which stores total time required for start (IN SECONDS)
     name = None
     time_to_complete = None
+    curr_user = None
 
     def __init__(self, new_time_to_complete, new_name):
         self.time_to_complete = new_time_to_complete
@@ -35,6 +36,10 @@ class Machine(ABC):
             time_in_sec = time_delta.seconds % 60
             return f"UNAVAILABLE \U0000274C for {time_in_min}mins and {time_in_sec}s by @{curr_user}"
 
+    def get_curr_user(self):
+        curr_user, end_time = storage.get_laundry_timer(self.name)
+        return curr_user
+
     def time_left_mins(self):
         return self.time_to_complete // 60
 
@@ -55,6 +60,3 @@ class Machine(ABC):
             new_curr_user = new_user
             storage.set_laundry_timer(self.name, new_curr_user, new_end_time)
             return True
-
-    def alarm(self):
-        return "Fuyohhhhhh!! Your clothes are ready for collection! Please collect them now so that others may use it"

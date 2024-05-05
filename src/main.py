@@ -92,14 +92,12 @@ def main():
     if config.get("PRODUCTION"):
         application.run_webhook(
             listen="0.0.0.0",
-            port=os.environ.get("PORT", 8080),
+            port=config.get("PORT"),
             webhook_url=config.get("WEBHOOK_URL"),
         )
     else:
         application.run_polling()
 
-
-WELCOME_MESSAGE = f"Welcome to Dragon Laundry Bot ({os.environ.get('VERSION','dev')})!\n\nUse the following commands to use this bot:\n/select: {strings.SELECT_COMMAND_DESCRIPTION}\n/status: {strings.STATUS_COMMAND_DESCRIPTION}\n\nThank you for using the bot!\nCredit to: @Kaijudo"
 
 START_INLINE_KEYBOARD = InlineKeyboardMarkup(
     [[InlineKeyboardButton("Exit", callback_data="exit")]]
@@ -111,7 +109,7 @@ async def start(update: Update, context: CallbackContext):
         return
 
     await update.message.reply_text(
-        WELCOME_MESSAGE,
+        strings.WELCOME_MESSAGE,
         reply_markup=START_INLINE_KEYBOARD,
     )
     return MENU
@@ -145,14 +143,9 @@ async def select(update: Update, context: CallbackContext):
 
 
 async def cancel(update: Update, context: CallbackContext):
-    """
-    Returns `ConversationHandler.END`, which tells the ConversationHandler that the conversation is over
-    """
     query = update.callback_query
     await query.answer()
-    await query.edit_message_text(
-        text="Haiyaaa then you call me for what\n\nUse /start again to call me"
-    )
+    await query.edit_message_text(text="Bye! Use /start again to call me again!")
     return ConversationHandler.END
 
 
@@ -190,13 +183,12 @@ async def backtomenu(update: Update, context: CallbackContext):
     query = update.callback_query
     await query.answer()
     await query.edit_message_text(
-        WELCOME_MESSAGE,
+        strings.WELCOME_MESSAGE,
         reply_markup=EXIT_INLINE_KEYBOARD,
     )
 
 
 def remove_job_if_exists(name: str, context: CallbackContext) -> bool:
-    """Remove job with given name. Returns whether job was removed."""
     current_jobs = context.job_queue.get_jobs_by_name(name)
     if not current_jobs:
         return False
@@ -205,12 +197,11 @@ def remove_job_if_exists(name: str, context: CallbackContext) -> bool:
     return True
 
 
-def alarm(context: CallbackContext, machine) -> None:
-    """Send the alarm message."""
+def alarm(context: CallbackContext, machine: Machine) -> None:
     job = context.job
     context.bot.send_message(
         job.context,
-        text="Fuyohhhhhh!! Your clothes are ready for collection! Please collect them now so that others may use it",
+        text=f"@{machine.get_curr_user} {strings.COMPLETION_MESSAGE}",
     )
 
 
