@@ -1,4 +1,4 @@
-import os
+import datetime
 import strings
 import storage
 from telegram import (
@@ -18,14 +18,14 @@ from machine import Machine
 from config import config, read_dotenv
 
 read_dotenv()
-storage.read()
+storage.read_timers()
 
 MENU = 1
 
 TBOT = Bot(config.get("TELEGRAM_BOT_API_KEY"))
 
-WASHER_TIMER = 32 * 60
-DRYER_TIMER = 32 * 60
+WASHER_TIMER = 34 * 60
+DRYER_TIMER = 34 * 60
 DRYER_ONE = Machine(DRYER_TIMER, "DRYER ONE")
 DRYER_TWO = Machine(DRYER_TIMER, "DRYER TWO")
 WASHER_ONE = Machine(WASHER_TIMER, "WASHER ONE")
@@ -89,6 +89,11 @@ def main():
 
     application.add_handler(conv_handler)
 
+    application.job_queue.run_repeating(
+        send_alarms, interval=datetime.timedelta(minutes=1)
+    )
+    send_alarms()
+
     if config.get("PRODUCTION"):
         application.run_webhook(
             listen="0.0.0.0",
@@ -102,6 +107,14 @@ def main():
 START_INLINE_KEYBOARD = InlineKeyboardMarkup(
     [[InlineKeyboardButton("Exit", callback_data="exit")]]
 )
+
+
+async def send_alarms(context=None):
+    for curr_user, chat_id in storage.check_alarms():
+        await TBOT.send_message(
+            chat_id=chat_id,
+            text=f"@{curr_user} {strings.COMPLETION_MESSAGE}",
+        )
 
 
 async def start(update: Update, context: CallbackContext):
@@ -188,15 +201,6 @@ async def backtomenu(update: Update, context: CallbackContext):
     )
 
 
-def remove_job_if_exists(name: str, context: CallbackContext) -> bool:
-    current_jobs = context.job_queue.get_jobs_by_name(name)
-    if not current_jobs:
-        return False
-    for job in current_jobs:
-        job.schedule_removal()
-    return True
-
-
 def alarm(context: CallbackContext, machine: Machine) -> None:
     job = context.job
     context.bot.send_message(
@@ -205,29 +209,20 @@ def alarm(context: CallbackContext, machine: Machine) -> None:
     )
 
 
-def set_timer_machine(machine):
+def set_timer_machine(machine: Machine):
     async def set_timer(update, context):
         machine_name = machine.get_name()
         upper_name = machine_name.upper()
         underscore_name = machine_name.lower().replace(" ", "_")
 
-        """Add a job to the queue."""
         chat_id = update.effective_message.chat_id
         query = update.callback_query
         await query.answer()
 
-        job_removed = remove_job_if_exists(str(chat_id), context)
-
-        if not (machine.start_machine(update.effective_message.chat.username)):
+        if not (machine.start_machine(update.effective_message.chat.username, chat_id)):
             text = f"{upper_name} is currently in use. Please come back again later!"
             await query.edit_message_text(text=text)
         else:
-            context.job_queue.run_once(
-                lambda context: alarm(context, machine),
-                machine.get_time_to_complete(),
-                chat_id=chat_id,
-                name=underscore_name,
-            )
             text = f"Timer Set for {machine.time_left_mins()}mins for {upper_name}. Please come back again!"
             await query.edit_message_text(text=text)
 

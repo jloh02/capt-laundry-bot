@@ -13,7 +13,7 @@ class Machine(ABC):
     time_to_complete = None
     curr_user = None
 
-    def __init__(self, new_time_to_complete, new_name):
+    def __init__(self, new_time_to_complete: int, new_name: str):
         self.time_to_complete = new_time_to_complete
         self.name = new_name
 
@@ -49,7 +49,7 @@ class Machine(ABC):
     def total_time(self):
         return f"{self.time_left_mins()}mins"
 
-    def start_machine(self, new_user):
+    def start_machine(self, new_user: str, chat_id: int):
         _, end_time = storage.get_laundry_timer(self.name)
         if not utils.is_available(end_time):
             return False
@@ -58,5 +58,5 @@ class Machine(ABC):
                 seconds=self.time_to_complete
             )
             new_curr_user = new_user
-            storage.set_laundry_timer(self.name, new_curr_user, new_end_time)
+            storage.set_laundry_timer(self.name, new_curr_user, new_end_time, chat_id)
             return True
