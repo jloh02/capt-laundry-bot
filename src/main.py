@@ -16,13 +16,15 @@ from telegram.ext import (
     CallbackQueryHandler,
     ConversationHandler,
 )
+from select_house import select_house_completed
 from machine import Machine
 from set_timer_machine import set_timer_machine
 from config import config, read_dotenv
+from utils import with_house_context
 
 read_dotenv()
 storage.read_timers()
-
+storage.read_house()
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
@@ -58,10 +60,12 @@ def main():
 
     COMMANDS = [
         CommandHandler("start", commands.start),
-        CommandHandler("select", commands.create_select_menu(MACHINES)),
+        CommandHandler(
+            "select", with_house_context(commands.create_select_menu(MACHINES))
+        ),
         CommandHandler(
             "status",
-            commands.create_status_command(MACHINES),
+            with_house_context(commands.create_status_command(MACHINES)),
         ),
     ]
     conv_handler = ConversationHandler(
@@ -73,6 +77,9 @@ def main():
             constants.ConvState.ConfirmSelect: [
                 CallbackQueryHandler(backtomenu, pattern=r"^no$"),
                 CallbackQueryHandler(set_timer_machine(MACHINES), pattern=r"^yes|.*$"),
+            ],
+            constants.ConvState.SelectHouse: [
+                CallbackQueryHandler(select_house_completed)
             ],
         },
         fallbacks=COMMANDS,

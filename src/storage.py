@@ -3,7 +3,8 @@ import json
 from config import config
 import datetime
 
-data_cache = {}
+timer_data_cache = {}
+house_data_cache = {}
 
 def get_timer_path():
     return f"{config.get("BASE_PATH")}/timers.json"
@@ -11,35 +12,62 @@ def get_timer_path():
 def get_alarm_path():
     return f"{config.get("BASE_PATH")}/alarms.txt"
 
+def get_house_path():
+    return f"{config.get("BASE_PATH")}/house.json"
+
+def read_house():
+    global house_data_cache
+
+    if not os.path.isfile(get_house_path()):
+        return
+    
+    house_data_cache.clear()
+    with open(get_house_path(), "r") as f:
+        house_data_cache.update(json.load(f))
+
+def write_house(chat_id:int, house:str):
+    global house_data_cache
+    
+    house_data_cache.update({chat_id:house})
+    dir = os.path.dirname(get_house_path())
+    if not os.path.isdir(dir):
+        os.makedirs(dir)
+
+    with open(get_house_path(), "w") as f:
+        json.dump(house_data_cache, f)
+
+def get_house(chat_id:int) -> str|None:
+    return house_data_cache.get(str(chat_id))
+
 def read_timers():
-    global data_cache
+    global timer_data_cache
 
     if not os.path.isfile(get_timer_path()):
         return
     
-    data_cache.clear()
+    timer_data_cache.clear()
     with open(get_timer_path(), "r") as f:
-        data_cache.update(json.load(f))
+        timer_data_cache.update(json.load(f))
 
 def write_timers():
-    global data_cache
+    global timer_data_cache
     
     dir = os.path.dirname(get_timer_path())
     if not os.path.isdir(dir):
         os.makedirs(dir)
 
     with open(get_timer_path(), "w") as f:
-        json.dump(data_cache, f)
+        json.dump(timer_data_cache, f)
 
 def set_laundry_timer(machine_name: str, curr_user: str, end_time: datetime.datetime, chat_id: int):
-    global data_cache
+    global timer_data_cache
     timestamp = int(end_time.timestamp())
-    data_cache.update({machine_name:{"currUser": curr_user, "endTime": timestamp}})
+    timer_data_cache.update({machine_name:{"currUser": curr_user, "endTime": timestamp}})
     write_timers()
     write_alarms(curr_user, timestamp, chat_id)
 
 def get_laundry_timer(name: str) -> tuple[str, datetime.datetime]:
-    data = data_cache.get(name)
+    data = timer_data_cache.get(name)
     if data and data.get("currUser") and data.get("endTime"):
         return (data.get("currUser"), datetime.datetime.fromtimestamp(data.get("endTime")))
     return ("", None)

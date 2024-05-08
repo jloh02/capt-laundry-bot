@@ -4,6 +4,7 @@ from enum import Enum
 class ConvState(str, Enum):
     RequestConfirmSelect = "RequestConfirmSelect"
     ConfirmSelect = "ConfirmSelect"
+    SelectHouse = "SelectHouse"
 
 
 SELECT_COMMAND_DESCRIPTION = "Select the washer/dryer that you want to use"

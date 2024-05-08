@@ -38,7 +38,12 @@ def create_select_menu(machines: dict[Machine]):
 
     async def select(update: Update, context: CallbackContext):
         logger.info(f"User {update.effective_user.username} started /select")
-        await update.message.reply_text(
+        send_message_method = (
+            update.callback_query.edit_message_text
+            if update.callback_query
+            else update.message.reply_text
+        )
+        await send_message_method(
             "\U0001F606\U0001F923 Please choose a service: \U0001F606\U0001F923",
             reply_markup=InlineKeyboardMarkup(keyboard),
         )
