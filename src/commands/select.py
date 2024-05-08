@@ -1,3 +1,4 @@
+import logging
 import constants
 from telegram import (
     Update,
@@ -7,6 +8,8 @@ from telegram import (
 from telegram.ext import (
     CallbackContext,
 )
+
+logger = logging.getLogger("select")
 
 SELECT_MACHINE_INLINE_KEYBOARD = InlineKeyboardMarkup(
     [
@@ -24,6 +27,7 @@ SELECT_MACHINE_INLINE_KEYBOARD = InlineKeyboardMarkup(
 
 
 async def select(update: Update, context: CallbackContext):
+    logger.info(f"User {update.effective_user.username} started /select")
     await update.message.reply_text(
         "\U0001F606\U0001F923 Please choose a service: \U0001F606\U0001F923",
         reply_markup=SELECT_MACHINE_INLINE_KEYBOARD,

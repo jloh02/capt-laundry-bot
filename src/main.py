@@ -1,3 +1,4 @@
+import logging
 import datetime
 import constants
 import storage
@@ -21,6 +22,16 @@ from config import config, read_dotenv
 
 read_dotenv()
 storage.read_timers()
+
+
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+)
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("apscheduler.scheduler").setLevel(logging.WARNING)
+logging.getLogger("apscheduler.executors.default").setLevel(logging.WARNING)
+
+logger = logging.getLogger("main")
 
 TBOT = Bot(config.get("TELEGRAM_BOT_API_KEY"))
 
@@ -82,6 +93,11 @@ def main():
     )
 
     application.add_handler(conv_handler)
+    application.add_error_handler(
+        lambda update, context: logger.error(
+            f"Update {update} caused error: {context.error}"
+        )
+    )
 
     application.job_queue.run_repeating(
         send_alarms, interval=datetime.timedelta(minutes=1)
@@ -99,6 +115,7 @@ def main():
 
 async def send_alarms(context=None):
     for curr_user, chat_id in storage.check_alarms():
+        logger.info(f"Sending alarm to {curr_user} in chat {chat_id}")
         await TBOT.send_message(
             chat_id=chat_id,
             text=f"@{curr_user} {constants.COMPLETION_MESSAGE}",
@@ -141,14 +158,6 @@ async def backtomenu(update: Update, context: CallbackContext):
     await query.edit_message_text(
         constants.WELCOME_MESSAGE,
         reply_markup=EXIT_INLINE_KEYBOARD,
-    )
-
-
-def alarm(context: CallbackContext, machine: Machine) -> None:
-    job = context.job
-    context.bot.send_message(
-        job.context,
-        text=f"@{machine.get_curr_user} {constants.COMPLETION_MESSAGE}",
     )
 
 

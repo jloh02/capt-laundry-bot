@@ -1,5 +1,8 @@
 from machine import Machine
 import constants
+import logging
+
+logger = logging.getLogger("set_timer_machine")
 
 
 def set_timer_machine(machine: Machine):
@@ -15,6 +18,7 @@ def set_timer_machine(machine: Machine):
             text = f"{machine_name} is currently in use. Please come back again later!"
             await query.edit_message_text(text=text)
         else:
+            logger.info(f"User {update.effective_user.username} started {machine_name}")
             text = f"Timer Set for {Machine.COMPLETION_TIME // 60}mins for {machine_name}. Please come back again!"
             await query.edit_message_text(text=text)
 

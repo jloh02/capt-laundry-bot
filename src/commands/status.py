@@ -1,9 +1,13 @@
+import logging
 from telegram import Update
 from telegram.ext import CallbackContext
+
+logger = logging.getLogger("status")
 
 
 def create_status_command(DRYER_ONE, DRYER_TWO, WASHER_ONE, WASHER_TWO):
     async def status(update: Update, context: CallbackContext):
+        logger.info(f"User {update.effective_user.username} started /status")
         DRYER_ONE_TIMER = DRYER_ONE.status()
         DRYER_TWO_TIMER = DRYER_TWO.status()
         WASHER_ONE_TIMER = WASHER_ONE.status()
