@@ -5,14 +5,19 @@ import logging
 logger = logging.getLogger("set_timer_machine")
 
 
-def set_timer_machine(machine: Machine):
+def set_timer_machine(machines: dict[Machine]):
     async def set_timer(update, context):
-        machine_name = machine.get_name()
-        # underscore_name = machine_name.lower().replace(" ", "_")
-
         chat_id = update.effective_message.chat_id
         query = update.callback_query
         await query.answer()
+
+        machine_id = query.data.split("|")[1].strip()
+        machine = machines.get(machine_id)
+
+        if machine == None:
+            raise Exception(f"Unknown machine {machine_id}")
+
+        machine_name = machine.get_name()
 
         if not (machine.start_machine(update.effective_message.chat.username, chat_id)):
             text = f"{machine_name} is currently in use. Please come back again later!"
@@ -22,6 +27,6 @@ def set_timer_machine(machine: Machine):
             text = f"Timer Set for {Machine.COMPLETION_TIME // 60}mins for {machine_name}. Please come back again!"
             await query.edit_message_text(text=text)
 
-        return constants.STATES.get("MENU")
+        return constants.ConvState.Menu
 
     return set_timer

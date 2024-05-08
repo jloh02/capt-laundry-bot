@@ -3,6 +3,7 @@ import datetime
 import pytz
 import utils
 import storage
+from config import config
 
 SGT_TIMEZONE = pytz.timezone("Asia/Singapore")
 
@@ -11,6 +12,7 @@ class Machine(ABC):
     curr_user = None
 
     def __init__(self, name: str):
+        Machine.COMPLETION_TIME = config.get("TIMER_DURATION_MINUTES") * 60
         self.name = name
 
     def get_name(self):
@@ -44,6 +46,3 @@ class Machine(ABC):
             new_curr_user = new_user
             storage.set_laundry_timer(self.name, new_curr_user, new_end_time, chat_id)
             return True
-
-
-Machine.COMPLETION_TIME = 1 * 60

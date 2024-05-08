@@ -15,4 +15,4 @@ async def start(update: Update, context: CallbackContext):
         constants.WELCOME_MESSAGE,
         reply_markup=START_INLINE_KEYBOARD,
     )
-    return constants.STATES.get("MENU")
+    return constants.ConvState.Menu

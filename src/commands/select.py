@@ -1,5 +1,6 @@
 import logging
 import constants
+from machine import Machine
 from telegram import (
     Update,
     InlineKeyboardButton,
@@ -11,25 +12,37 @@ from telegram.ext import (
 
 logger = logging.getLogger("select")
 
-SELECT_MACHINE_INLINE_KEYBOARD = InlineKeyboardMarkup(
-    [
-        [
-            InlineKeyboardButton("Dryer One", callback_data="dryer_one"),
-            InlineKeyboardButton("Dryer Two", callback_data="dryer_two"),
-        ],
-        [
-            InlineKeyboardButton("Washer One", callback_data="washer_one"),
-            InlineKeyboardButton("Washer Two", callback_data="washer_two"),
-        ],
-        [InlineKeyboardButton("Exit", callback_data="exit")],
-    ]
-)
 
+def create_select_menu(machines: dict[Machine]):
+    keyboard = []
+    machineKV = list(machines.items())
+    num_machines = len(machineKV)
+    for i in range(0, num_machines, 2):
+        machine_id0, machine0 = machineKV[i]
+        if i + 1 == num_machines:
+            keyboard.append(
+                [InlineKeyboardButton(machine0.get_name(), callback_data=machine_id0)]
+            )
+        else:
+            machine_id1, machine1 = machineKV[i + 1]
+            keyboard.append(
+                [
+                    InlineKeyboardButton(
+                        machine0.get_name(), callback_data=machine_id0
+                    ),
+                    InlineKeyboardButton(
+                        machine1.get_name(), callback_data=machine_id1
+                    ),
+                ]
+            )
+    keyboard.append([InlineKeyboardButton("Exit", callback_data="exit")])
 
-async def select(update: Update, context: CallbackContext):
-    logger.info(f"User {update.effective_user.username} started /select")
-    await update.message.reply_text(
-        "\U0001F606\U0001F923 Please choose a service: \U0001F606\U0001F923",
-        reply_markup=SELECT_MACHINE_INLINE_KEYBOARD,
-    )
-    return constants.STATES.get("MENU")
+    async def select(update: Update, context: CallbackContext):
+        logger.info(f"User {update.effective_user.username} started /select")
+        await update.message.reply_text(
+            "\U0001F606\U0001F923 Please choose a service: \U0001F606\U0001F923",
+            reply_markup=InlineKeyboardMarkup(keyboard),
+        )
+        return constants.ConvState.RequestConfirmSelect
+
+    return select

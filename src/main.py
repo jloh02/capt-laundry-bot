@@ -35,10 +35,12 @@ logger = logging.getLogger("main")
 
 TBOT = Bot(config.get("TELEGRAM_BOT_API_KEY"))
 
-DRYER_ONE = Machine("Dryer One")
-DRYER_TWO = Machine("Dryer Two")
-WASHER_ONE = Machine("Washer One")
-WASHER_TWO = Machine("Washer Two")
+MACHINES = {
+    "Dryer One": Machine("Dryer One"),
+    "Dryer Two": Machine("Dryer Two"),
+    "Washer One": Machine("Washer One"),
+    "Washer Two": Machine("Washer Two"),
+}
 
 COMMANDS_DICT = {
     "start": "Display help page and version",
@@ -57,37 +59,30 @@ def main():
     MENU_DICT = {
         "exit": commands.cancel,
         "exits": commands.cancel,
-        "dryer_one": create_double_confirm_callback("dryer_one"),
-        "dryer_two": create_double_confirm_callback("dryer_two"),
-        "washer_one": create_double_confirm_callback("washer_one"),
-        "washer_two": create_double_confirm_callback("washer_two"),
-        "no_dryer_one": backtomenu,
-        "no_dryer_two": backtomenu,
-        "no_washer_one": backtomenu,
-        "no_washer_two": backtomenu,
-        "yes_dryer_one": set_timer_machine(DRYER_ONE),
-        "yes_dryer_two": set_timer_machine(DRYER_TWO),
-        "yes_washer_one": set_timer_machine(WASHER_ONE),
-        "yes_washer_two": set_timer_machine(WASHER_TWO),
     }
 
     COMMANDS = [
         CommandHandler("start", commands.start),
-        CommandHandler("select", commands.select),
+        CommandHandler("select", commands.create_select_menu(MACHINES)),
         CommandHandler(
             "status",
-            commands.create_status_command(
-                DRYER_ONE, DRYER_TWO, WASHER_ONE, WASHER_TWO
-            ),
+            commands.create_status_command(MACHINES),
         ),
     ]
     conv_handler = ConversationHandler(
         entry_points=COMMANDS,
         states={
-            constants.STATES.get("MENU"): [
+            constants.ConvState.Menu: [
                 CallbackQueryHandler(fn, pattern=f"^{cmd}$")
                 for cmd, fn in MENU_DICT.items()
-            ]
+            ],
+            constants.ConvState.RequestConfirmSelect: [
+                CallbackQueryHandler(double_confirm)
+            ],
+            constants.ConvState.ConfirmSelect: [
+                CallbackQueryHandler(backtomenu, pattern=r"^no$"),
+                CallbackQueryHandler(set_timer_machine(MACHINES), pattern=r"^yes|.*$"),
+            ],
         },
         fallbacks=COMMANDS,
     )
@@ -100,7 +95,7 @@ def main():
     )
 
     application.job_queue.run_repeating(
-        send_alarms, interval=datetime.timedelta(minutes=1)
+        send_alarms, interval=datetime.timedelta(seconds=30)
     )
 
     if config.get("PRODUCTION"):
@@ -122,29 +117,29 @@ async def send_alarms(context=None):
         )
 
 
-def create_inline_for_callback(machine_name):
-    markup = InlineKeyboardMarkup(
-        [
+async def double_confirm(update: Update, context: CallbackContext) -> int:
+    query = update.callback_query
+    await query.answer()
+
+    machine_id = query.data
+    machine = MACHINES.get(machine_id)
+
+    if machine == None:
+        raise Exception(f"Unknown machine {machine_id}")
+
+    machine_name = machine.get_name()
+
+    await query.edit_message_text(
+        text=f"Timer for {machine_name} will begin?",
+        reply_markup=InlineKeyboardMarkup(
             [
-                InlineKeyboardButton("Yes", callback_data=f"yes_{machine_name}"),
-            ],
-            [InlineKeyboardButton("No", callback_data=f"no_{machine_name}")],
-        ]
+                [InlineKeyboardButton("Yes", callback_data=f"yes|{machine_id}")],
+                [InlineKeyboardButton("No", callback_data="no")],
+            ]
+        ),
     )
-    text = f"Timer for {machine_name.upper().replace('_',' ')} will begin?"
-    return (text, markup)
 
-
-def create_double_confirm_callback(machine_name: str):
-    text, markup = create_inline_for_callback(machine_name)
-
-    async def callback(update: Update, _: CallbackContext) -> int:
-        query = update.callback_query
-        await query.answer()
-        await query.edit_message_text(text=text, reply_markup=markup)
-        return constants.STATES.get("MENU")
-
-    return callback
+    return constants.ConvState.ConfirmSelect
 
 
 EXIT_INLINE_KEYBOARD = InlineKeyboardMarkup(
