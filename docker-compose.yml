@@ -7,5 +7,6 @@ services:
       - static-volume:/var/lib/capt_laundry_bot
     environment:
       BASE_PATH: /var/lib/capt_laundry_bot
+    restart: unless-stopped
 volumes:
   static-volume:
