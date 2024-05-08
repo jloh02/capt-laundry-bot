@@ -15,7 +15,7 @@ def set_timer_machine(machine: Machine):
             text = f"{machine_name} is currently in use. Please come back again later!"
             await query.edit_message_text(text=text)
         else:
-            text = f"Timer Set for {Machine.COMPLETION_TIME}mins for {machine_name}. Please come back again!"
+            text = f"Timer Set for {Machine.COMPLETION_TIME // 60}mins for {machine_name}. Please come back again!"
             await query.edit_message_text(text=text)
 
         return constants.STATES.get("MENU")

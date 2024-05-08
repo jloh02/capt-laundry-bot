@@ -86,7 +86,6 @@ def main():
     application.job_queue.run_repeating(
         send_alarms, interval=datetime.timedelta(minutes=1)
     )
-    send_alarms()
 
     if config.get("PRODUCTION"):
         application.run_webhook(
