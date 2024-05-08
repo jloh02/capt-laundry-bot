@@ -1,6 +1,7 @@
 import datetime
-import strings
+import constants
 import storage
+import commands
 from telegram import (
     Bot,
     Update,
@@ -15,27 +16,23 @@ from telegram.ext import (
     ConversationHandler,
 )
 from machine import Machine
+from set_timer_machine import set_timer_machine
 from config import config, read_dotenv
 
 read_dotenv()
 storage.read_timers()
 
-MENU = 1
-
 TBOT = Bot(config.get("TELEGRAM_BOT_API_KEY"))
 
-WASHER_TIMER = 34 * 60
-DRYER_TIMER = 34 * 60
-DRYER_ONE = Machine(DRYER_TIMER, "DRYER ONE")
-DRYER_TWO = Machine(DRYER_TIMER, "DRYER TWO")
-WASHER_ONE = Machine(WASHER_TIMER, "WASHER ONE")
-WASHER_TWO = Machine(WASHER_TIMER, "WASHER TWO")
-
+DRYER_ONE = Machine("Dryer One")
+DRYER_TWO = Machine("Dryer Two")
+WASHER_ONE = Machine("Washer One")
+WASHER_TWO = Machine("Washer Two")
 
 COMMANDS_DICT = {
     "start": "Display help page and version",
-    "select": strings.SELECT_COMMAND_DESCRIPTION,
-    "status": strings.STATUS_COMMAND_DESCRIPTION,
+    "select": constants.SELECT_COMMAND_DESCRIPTION,
+    "status": constants.STATUS_COMMAND_DESCRIPTION,
 }
 
 TBOT.set_my_commands(COMMANDS_DICT.items())
@@ -46,22 +43,9 @@ def main():
         Application.builder().token(config.get("TELEGRAM_BOT_API_KEY")).build()
     )
 
-    # Use the pattern parameter to pass CallbackQueries with specific
-    # data pattern to the corresponding handlers.
-    # ^ means "start of line/string"
-    # $ means "end of line/string"
-    # So ^ABC$ will only allow 'ABC'
-
-    ENTRY_POINT_DICT = {
-        "start": start,
-        "select": select,
-        "status": status,
-    }
-    FALLBACK_DICT = ENTRY_POINT_DICT
-
     MENU_DICT = {
-        "exit": cancel,
-        "exits": cancel,
+        "exit": commands.cancel,
+        "exits": commands.cancel,
         "dryer_one": create_double_confirm_callback("dryer_one"),
         "dryer_two": create_double_confirm_callback("dryer_two"),
         "washer_one": create_double_confirm_callback("washer_one"),
@@ -76,15 +60,25 @@ def main():
         "yes_washer_two": set_timer_machine(WASHER_TWO),
     }
 
+    COMMANDS = [
+        CommandHandler("start", commands.start),
+        CommandHandler("select", commands.select),
+        CommandHandler(
+            "status",
+            commands.create_status_command(
+                DRYER_ONE, DRYER_TWO, WASHER_ONE, WASHER_TWO
+            ),
+        ),
+    ]
     conv_handler = ConversationHandler(
-        entry_points=[CommandHandler(cmd, fn) for cmd, fn in ENTRY_POINT_DICT.items()],
+        entry_points=COMMANDS,
         states={
-            MENU: [
+            constants.STATES.get("MENU"): [
                 CallbackQueryHandler(fn, pattern=f"^{cmd}$")
                 for cmd, fn in MENU_DICT.items()
             ]
         },
-        fallbacks=[CommandHandler(cmd, fn) for cmd, fn in FALLBACK_DICT.items()],
+        fallbacks=COMMANDS,
     )
 
     application.add_handler(conv_handler)
@@ -104,62 +98,12 @@ def main():
         application.run_polling()
 
 
-START_INLINE_KEYBOARD = InlineKeyboardMarkup(
-    [[InlineKeyboardButton("Exit", callback_data="exit")]]
-)
-
-
 async def send_alarms(context=None):
     for curr_user, chat_id in storage.check_alarms():
         await TBOT.send_message(
             chat_id=chat_id,
-            text=f"@{curr_user} {strings.COMPLETION_MESSAGE}",
+            text=f"@{curr_user} {constants.COMPLETION_MESSAGE}",
         )
-
-
-async def start(update: Update, context: CallbackContext):
-    if len(context.args) > 0:
-        return
-
-    await update.message.reply_text(
-        strings.WELCOME_MESSAGE,
-        reply_markup=START_INLINE_KEYBOARD,
-    )
-    return MENU
-
-
-SELECT_MACHINE_INLINE_KEYBOARD = InlineKeyboardMarkup(
-    [
-        [
-            InlineKeyboardButton("Dryer One", callback_data="dryer_one"),
-            InlineKeyboardButton("Dryer Two", callback_data="dryer_two"),
-        ],
-        [
-            InlineKeyboardButton("Washer One", callback_data="washer_one"),
-            InlineKeyboardButton("Washer Two", callback_data="washer_two"),
-        ],
-        [InlineKeyboardButton("Exit", callback_data="exit")],
-    ]
-)
-
-
-async def select(update: Update, context: CallbackContext):
-    # Don't allow users to use /select command in group chats
-    if update.message.chat.type != "private":
-        return MENU
-
-    await update.message.reply_text(
-        "\U0001F606\U0001F923 Please choose a service: \U0001F606\U0001F923",
-        reply_markup=SELECT_MACHINE_INLINE_KEYBOARD,
-    )
-    return MENU
-
-
-async def cancel(update: Update, context: CallbackContext):
-    query = update.callback_query
-    await query.answer()
-    await query.edit_message_text(text="Bye! Use /start again to call me again!")
-    return ConversationHandler.END
 
 
 def create_inline_for_callback(machine_name):
@@ -182,7 +126,7 @@ def create_double_confirm_callback(machine_name: str):
         query = update.callback_query
         await query.answer()
         await query.edit_message_text(text=text, reply_markup=markup)
-        return MENU
+        return constants.STATES.get("MENU")
 
     return callback
 
@@ -196,7 +140,7 @@ async def backtomenu(update: Update, context: CallbackContext):
     query = update.callback_query
     await query.answer()
     await query.edit_message_text(
-        strings.WELCOME_MESSAGE,
+        constants.WELCOME_MESSAGE,
         reply_markup=EXIT_INLINE_KEYBOARD,
     )
 
@@ -205,49 +149,8 @@ def alarm(context: CallbackContext, machine: Machine) -> None:
     job = context.job
     context.bot.send_message(
         job.context,
-        text=f"@{machine.get_curr_user} {strings.COMPLETION_MESSAGE}",
+        text=f"@{machine.get_curr_user} {constants.COMPLETION_MESSAGE}",
     )
-
-
-def set_timer_machine(machine: Machine):
-    async def set_timer(update, context):
-        machine_name = machine.get_name()
-        upper_name = machine_name.upper()
-        underscore_name = machine_name.lower().replace(" ", "_")
-
-        chat_id = update.effective_message.chat_id
-        query = update.callback_query
-        await query.answer()
-
-        if not (machine.start_machine(update.effective_message.chat.username, chat_id)):
-            text = f"{upper_name} is currently in use. Please come back again later!"
-            await query.edit_message_text(text=text)
-        else:
-            text = f"Timer Set for {machine.time_left_mins()}mins for {upper_name}. Please come back again!"
-            await query.edit_message_text(text=text)
-
-        return MENU
-
-    return set_timer
-
-
-async def status(update: Update, context: CallbackContext):
-    DRYER_ONE_TIMER = DRYER_ONE.status()
-    DRYER_TWO_TIMER = DRYER_TWO.status()
-    WASHER_ONE_TIMER = WASHER_ONE.status()
-    WASHER_TWO_TIMER = WASHER_TWO.status()
-
-    reply_text = f"""Status of Laundry Machines:
-  
-Dryer One: {DRYER_ONE_TIMER}
-  
-Dryer Two: {DRYER_TWO_TIMER}
-  
-Washer One: {WASHER_ONE_TIMER}
-  
-Washer Two: {WASHER_TWO_TIMER}"""
-
-    await update.message.reply_text(reply_text)
 
 
 if __name__ == "__main__":

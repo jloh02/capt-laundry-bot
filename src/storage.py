@@ -40,6 +40,7 @@ def set_laundry_timer(machine_name: str, curr_user: str, end_time: datetime.date
 
 def get_laundry_timer(name: str) -> tuple[str, datetime.datetime]:
     data = data_cache.get(name)
+    print(data_cache, name)
     if data and data.get("currUser") and data.get("endTime"):
         return (data.get("currUser"), datetime.datetime.fromtimestamp(data.get("endTime")))
     return ("", None)

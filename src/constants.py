@@ -1,3 +1,5 @@
+STATES = {"MENU": "menu"}
+
 SELECT_COMMAND_DESCRIPTION = "Select the washer/dryer that you want to use"
 STATUS_COMMAND_DESCRIPTION = "Check the status of Washers and Dryers"
 COMPLETION_MESSAGE = "your clothes are ready for collection! Please collect them now so that others may use it!"

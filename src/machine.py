@@ -8,20 +8,13 @@ SGT_TIMEZONE = pytz.timezone("Asia/Singapore")
 
 
 class Machine(ABC):
-    # constant value which stores total time required for start (IN SECONDS)
-    name = None
-    time_to_complete = None
     curr_user = None
 
-    def __init__(self, new_time_to_complete: int, new_name: str):
-        self.time_to_complete = new_time_to_complete
-        self.name = new_name
+    def __init__(self, name: str):
+        self.name = name
 
     def get_name(self):
         return self.name
-
-    def get_time_to_complete(self):
-        return self.time_to_complete
 
     def status(self):
         curr_user, end_time = storage.get_laundry_timer(self.name)
@@ -40,23 +33,17 @@ class Machine(ABC):
         curr_user, end_time = storage.get_laundry_timer(self.name)
         return curr_user
 
-    def time_left_mins(self):
-        return self.time_to_complete // 60
-
-    def time_left_secs(self):
-        return self.time_to_complete % 60
-
-    def total_time(self):
-        return f"{self.time_left_mins()}mins"
-
     def start_machine(self, new_user: str, chat_id: int):
         _, end_time = storage.get_laundry_timer(self.name)
         if not utils.is_available(end_time):
             return False
         else:
             new_end_time = datetime.datetime.now() + datetime.timedelta(
-                seconds=self.time_to_complete
+                seconds=Machine.COMPLETION_TIME
             )
             new_curr_user = new_user
             storage.set_laundry_timer(self.name, new_curr_user, new_end_time, chat_id)
             return True
+
+
+Machine.COMPLETION_TIME = 1 * 60
