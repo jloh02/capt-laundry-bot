@@ -1,6 +1,6 @@
 import constants
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import CallbackContext
+from telegram import Update
+from telegram.ext import CallbackContext, ConversationHandler
 
 
 async def start(update: Update, context: CallbackContext):
@@ -8,4 +8,4 @@ async def start(update: Update, context: CallbackContext):
         return
 
     await update.message.reply_text(constants.WELCOME_MESSAGE)
-    return constants.ConvState.Menu
+    return ConversationHandler.END

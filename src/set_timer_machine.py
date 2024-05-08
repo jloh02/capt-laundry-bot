@@ -1,5 +1,5 @@
 from machine import Machine
-import constants
+from telegram.ext import ConversationHandler
 import logging
 
 logger = logging.getLogger("set_timer_machine")
@@ -27,6 +27,6 @@ def set_timer_machine(machines: dict[Machine]):
             text = f"Timer Set for {Machine.COMPLETION_TIME // 60}mins for {machine_name}. Please come back again!"
             await query.edit_message_text(text=text)
 
-        return constants.ConvState.Menu
+        return ConversationHandler.END
 
     return set_timer
