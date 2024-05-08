@@ -24,10 +24,6 @@ SELECT_MACHINE_INLINE_KEYBOARD = InlineKeyboardMarkup(
 
 
 async def select(update: Update, context: CallbackContext):
-    # Don't allow users to use /select command in group chats
-    if update.message.chat.type != "private":
-        return constants.STATES.get("MENU")
-
     await update.message.reply_text(
         "\U0001F606\U0001F923 Please choose a service: \U0001F606\U0001F923",
         reply_markup=SELECT_MACHINE_INLINE_KEYBOARD,
