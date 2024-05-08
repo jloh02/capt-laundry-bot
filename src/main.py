@@ -56,11 +56,6 @@ def main():
         Application.builder().token(config.get("TELEGRAM_BOT_API_KEY")).build()
     )
 
-    MENU_DICT = {
-        "exit": commands.cancel,
-        "exits": commands.cancel,
-    }
-
     COMMANDS = [
         CommandHandler("start", commands.start),
         CommandHandler("select", commands.create_select_menu(MACHINES)),
@@ -72,10 +67,6 @@ def main():
     conv_handler = ConversationHandler(
         entry_points=COMMANDS,
         states={
-            constants.ConvState.Menu: [
-                CallbackQueryHandler(fn, pattern=f"^{cmd}$")
-                for cmd, fn in MENU_DICT.items()
-            ],
             constants.ConvState.RequestConfirmSelect: [
                 CallbackQueryHandler(double_confirm)
             ],
@@ -142,18 +133,10 @@ async def double_confirm(update: Update, context: CallbackContext) -> int:
     return constants.ConvState.ConfirmSelect
 
 
-EXIT_INLINE_KEYBOARD = InlineKeyboardMarkup(
-    [[InlineKeyboardButton("Exit", callback_data="exits")]]
-)
-
-
 async def backtomenu(update: Update, context: CallbackContext):
     query = update.callback_query
     await query.answer()
-    await query.edit_message_text(
-        constants.WELCOME_MESSAGE,
-        reply_markup=EXIT_INLINE_KEYBOARD,
-    )
+    await query.edit_message_text(constants.WELCOME_MESSAGE)
 
 
 if __name__ == "__main__":

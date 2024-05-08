@@ -2,7 +2,6 @@ from enum import Enum
 
 
 class ConvState(str, Enum):
-    Menu = "Menu"
     RequestConfirmSelect = "RequestConfirmSelect"
     ConfirmSelect = "ConfirmSelect"
 

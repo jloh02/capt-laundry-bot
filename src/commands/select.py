@@ -35,7 +35,6 @@ def create_select_menu(machines: dict[Machine]):
                     ),
                 ]
             )
-    keyboard.append([InlineKeyboardButton("Exit", callback_data="exit")])
 
     async def select(update: Update, context: CallbackContext):
         logger.info(f"User {update.effective_user.username} started /select")
