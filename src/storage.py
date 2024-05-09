@@ -89,10 +89,9 @@ def check_alarms() -> list[tuple[str, str, int]]:
         alarms = []
         lines = f.readlines()
         for line in lines:
-            line = line.strip()
             end_timestamp, machine_house_name, curr_user, chat_id = line.split(" | ")
             if now > int(end_timestamp):
-                alarms.append((curr_user, chat_id, machine_house_name))
+                alarms.append((curr_user, chat_id.strip(), machine_house_name))
             else: 
                 rem_lines.append(line)
         f.seek(0)
