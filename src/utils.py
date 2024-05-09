@@ -1,6 +1,6 @@
 import datetime
 import storage
-from select_house import select_house
+from select_house import create_select_house
 from telegram import Update
 from telegram.ext import CallbackContext
 
@@ -13,6 +13,8 @@ def is_available(end_time):
 
 
 def with_house_context(callback):
+    select_house = create_select_house()
+
     async def contexted_callback(update: Update, context: CallbackContext):
         house = storage.get_house(update.message.chat_id)
         if not house:

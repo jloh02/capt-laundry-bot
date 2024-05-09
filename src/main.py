@@ -37,12 +37,18 @@ logger = logging.getLogger("main")
 
 TBOT = Bot(config.get("TELEGRAM_BOT_API_KEY"))
 
-MACHINES = {
-    "Dryer One": Machine("Dryer One"),
-    "Dryer Two": Machine("Dryer Two"),
-    "Washer One": Machine("Washer One"),
-    "Washer Two": Machine("Washer Two"),
-}
+MACHINES = {}
+for house_id in constants.HOUSES.keys():
+    MACHINES.update(
+        {
+            house_id: dict(
+                [
+                    [machine_name, Machine(house_id, machine_name)]
+                    for machine_name in constants.MACHINE_NAMES
+                ]
+            )
+        }
+    )
 
 COMMANDS_DICT = {
     "start": "Display help page and version",
@@ -60,9 +66,7 @@ def main():
 
     COMMANDS = [
         CommandHandler("start", commands.start),
-        CommandHandler(
-            "select", with_house_context(commands.create_select_menu(MACHINES))
-        ),
+        CommandHandler("select", with_house_context(commands.create_select_menu())),
         CommandHandler(
             "status",
             with_house_context(commands.create_status_command(MACHINES)),
@@ -120,7 +124,7 @@ async def double_confirm(update: Update, context: CallbackContext) -> int:
     await query.answer()
 
     machine_id = query.data
-    machine = MACHINES.get(machine_id)
+    machine = MACHINES.get(context.chat_data.get("house")).get(machine_id)
 
     if machine == None:
         raise Exception(f"Unknown machine {machine_id}")

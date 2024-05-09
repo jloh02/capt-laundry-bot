@@ -59,15 +59,18 @@ def write_timers():
     with open(get_timer_path(), "w") as f:
         json.dump(timer_data_cache, f)
 
-def set_laundry_timer(machine_name: str, curr_user: str, end_time: datetime.datetime, chat_id: int):
+def concatenate_house_machine(house:str, machine_name:str) -> str:
+    return f"{house}_{machine_name}"
+
+def set_laundry_timer(house:str, machine_name: str, curr_user: str, end_time: datetime.datetime, chat_id: int):
     global timer_data_cache
     timestamp = int(end_time.timestamp())
-    timer_data_cache.update({machine_name:{"currUser": curr_user, "endTime": timestamp}})
+    timer_data_cache.update({concatenate_house_machine(house, machine_name):{"currUser": curr_user, "endTime": timestamp}})
     write_timers()
     write_alarms(curr_user, timestamp, chat_id)
 
-def get_laundry_timer(name: str) -> tuple[str, datetime.datetime]:
-    data = timer_data_cache.get(name)
+def get_laundry_timer(house:str, machine_name: str) -> tuple[str, datetime.datetime]:
+    data = timer_data_cache.get(concatenate_house_machine(house, machine_name))
     if data and data.get("currUser") and data.get("endTime"):
         return (data.get("currUser"), datetime.datetime.fromtimestamp(data.get("endTime")))
     return ("", None)

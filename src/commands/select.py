@@ -13,29 +13,26 @@ from telegram.ext import (
 logger = logging.getLogger("select")
 
 
-def create_select_menu(machines: dict[Machine]):
+def create_select_menu():
     keyboard = []
-    machineKV = list(machines.items())
-    num_machines = len(machineKV)
+    num_machines = len(constants.MACHINE_NAMES)
     for i in range(0, num_machines, 2):
-        machine_id0, machine0 = machineKV[i]
         if i + 1 == num_machines:
             keyboard.append(
-                [InlineKeyboardButton(machine0.get_name(), callback_data=machine_id0)]
+                [InlineKeyboardButton(constants.MACHINE_NAMES[i], callback_data=constants.MACHINE_NAMES[i])]
             )
         else:
-            machine_id1, machine1 = machineKV[i + 1]
             keyboard.append(
                 [
                     InlineKeyboardButton(
-                        machine0.get_name(), callback_data=machine_id0
+                        constants.MACHINE_NAMES[i], callback_data=constants.MACHINE_NAMES[i]
                     ),
                     InlineKeyboardButton(
-                        machine1.get_name(), callback_data=machine_id1
+                        constants.MACHINE_NAMES[i+1], callback_data=constants.MACHINE_NAMES[i+1]
                     ),
                 ]
             )
-
+    keyboard_markup = InlineKeyboardMarkup(keyboard)
     async def select(update: Update, context: CallbackContext):
         logger.info(f"User {update.effective_user.username} started /select")
         send_message_method = (
@@ -44,8 +41,8 @@ def create_select_menu(machines: dict[Machine]):
             else update.message.reply_text
         )
         await send_message_method(
-            "\U0001F606\U0001F923 Please choose a service: \U0001F606\U0001F923",
-            reply_markup=InlineKeyboardMarkup(keyboard),
+            f"Welcome to {context.chat_data.get("house")} Laundry Bot!\n\nPlease choose a service:",
+            reply_markup=keyboard_markup,
         )
         return constants.ConvState.RequestConfirmSelect
 

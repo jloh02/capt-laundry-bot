@@ -1,18 +1,19 @@
-from machine import Machine
-from telegram.ext import ConversationHandler
 import logging
+from machine import Machine
+from telegram.ext import ConversationHandler, CallbackContext
+from telegram import Update
 
 logger = logging.getLogger("set_timer_machine")
 
 
-def set_timer_machine(machines: dict[Machine]):
-    async def set_timer(update, context):
+def set_timer_machine(machines: dict[str, dict[str, Machine]]):
+    async def set_timer(update: Update, context: CallbackContext):
         chat_id = update.effective_message.chat_id
         query = update.callback_query
         await query.answer()
 
         machine_id = query.data.split("|")[1].strip()
-        machine = machines.get(machine_id)
+        machine = machines.get(context.chat_data.get("house")).get(machine_id)
 
         if machine == None:
             raise Exception(f"Unknown machine {machine_id}")

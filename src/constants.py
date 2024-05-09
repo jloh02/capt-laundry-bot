@@ -1,5 +1,14 @@
 from enum import Enum
 
+HOUSES = {
+    "ROC": "ROC",
+    "Dragon": "Dragon",
+    "Garuda": "Garuda",
+    "Phoenix": "Phoenix",
+    "Tulpar": "Tulpar",
+}
+MACHINE_NAMES = ["Dryer One", "Dryer Two", "Washer One", "Washer Two"]
+
 
 class ConvState(str, Enum):
     RequestConfirmSelect = "RequestConfirmSelect"
