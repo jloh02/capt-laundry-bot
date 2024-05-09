@@ -3,12 +3,7 @@ import datetime
 import constants
 import storage
 import commands
-from telegram import (
-    Bot,
-    Update,
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
-)
+from telegram import Bot, Update
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -16,8 +11,9 @@ from telegram.ext import (
     CallbackQueryHandler,
     ConversationHandler,
 )
-from select_house import select_house_completed
 from machine import Machine
+from double_confirm import create_double_confirm
+from select_house import select_house_completed
 from set_timer_machine import set_timer_machine
 from config import config, read_dotenv
 from utils import with_house_context
@@ -76,7 +72,7 @@ def main():
         entry_points=COMMANDS,
         states={
             constants.ConvState.RequestConfirmSelect: [
-                CallbackQueryHandler(double_confirm)
+                CallbackQueryHandler(create_double_confirm(MACHINES))
             ],
             constants.ConvState.ConfirmSelect: [
                 CallbackQueryHandler(backtomenu, pattern=r"^no$"),
@@ -117,31 +113,6 @@ async def send_alarms(context=None):
             chat_id=chat_id,
             text=f"@{curr_user} {constants.COMPLETION_MESSAGE}",
         )
-
-
-async def double_confirm(update: Update, context: CallbackContext) -> int:
-    query = update.callback_query
-    await query.answer()
-
-    machine_id = query.data
-    machine = MACHINES.get(context.chat_data.get("house")).get(machine_id)
-
-    if machine == None:
-        raise Exception(f"Unknown machine {machine_id}")
-
-    machine_name = machine.get_name()
-
-    await query.edit_message_text(
-        text=f"Timer for {machine_name} will begin?",
-        reply_markup=InlineKeyboardMarkup(
-            [
-                [InlineKeyboardButton("Yes", callback_data=f"yes|{machine_id}")],
-                [InlineKeyboardButton("No", callback_data="no")],
-            ]
-        ),
-    )
-
-    return constants.ConvState.ConfirmSelect
 
 
 async def backtomenu(update: Update, context: CallbackContext):

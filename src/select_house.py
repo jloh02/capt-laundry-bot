@@ -10,8 +10,14 @@ from telegram.ext import CallbackContext, ConversationHandler
 
 logger = logging.getLogger("select_house")
 
+select_house_global = None
+
 
 def create_select_house():
+    global select_house_global
+    if select_house_global:
+        return select_house_global
+
     keyboard = []
     houses = list(constants.HOUSES.items())
     num_houses = len(houses)
@@ -57,6 +63,7 @@ def create_select_house():
         )
         return constants.ConvState.SelectHouse
 
+    select_house_global = select_house
     return select_house
 
 

@@ -28,7 +28,7 @@ def read_house():
 def write_house(chat_id:int, house:str):
     global house_data_cache
     
-    house_data_cache.update({chat_id:house})
+    house_data_cache.update({str(chat_id):house})
     dir = os.path.dirname(get_house_path())
     if not os.path.isdir(dir):
         os.makedirs(dir)

@@ -1,6 +1,5 @@
 import logging
 import constants
-from machine import Machine
 from telegram import (
     Update,
     InlineKeyboardButton,
@@ -12,8 +11,13 @@ from telegram.ext import (
 
 logger = logging.getLogger("select")
 
+select_menu_global = None
 
 def create_select_menu():
+    global select_menu_global
+    if select_menu_global:
+        return select_menu_global
+    
     keyboard = []
     num_machines = len(constants.MACHINE_NAMES)
     for i in range(0, num_machines, 2):
@@ -32,8 +36,9 @@ def create_select_menu():
                     ),
                 ]
             )
+    keyboard.append([InlineKeyboardButton("Change House", callback_data=constants.ConvState.SelectHouse)])
     keyboard_markup = InlineKeyboardMarkup(keyboard)
-    async def select(update: Update, context: CallbackContext):
+    async def select_menu(update: Update, context: CallbackContext):
         logger.info(f"User {update.effective_user.username} started /select")
         send_message_method = (
             update.callback_query.edit_message_text
@@ -46,4 +51,5 @@ def create_select_menu():
         )
         return constants.ConvState.RequestConfirmSelect
 
-    return select
+    select_menu_global = select_menu
+    return select_menu
