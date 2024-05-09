@@ -26,6 +26,7 @@ git clone https://github.com/jloh02/capt-laundry-bot
 
 ```
 TELEGRAM_BOT_API_KEY=<YOUR_API_KEY>
+TIMER_DURATION_MINUTES=<TIMER_DURATION_DEFAULTS_TO_34>
 ```
 
 3. Install Packages
