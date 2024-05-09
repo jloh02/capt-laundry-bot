@@ -41,7 +41,7 @@ def create_select_menu():
             else update.message.reply_text
         )
         await send_message_method(
-            f"Welcome to {context.chat_data.get("house")} Laundry Bot!\n\nPlease choose a service:",
+            f"{constants.HOUSES.get(context.chat_data.get("house"))}\n\nPlease choose a service:",
             reply_markup=keyboard_markup,
         )
         return constants.ConvState.RequestConfirmSelect

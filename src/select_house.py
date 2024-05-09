@@ -21,8 +21,8 @@ def create_select_house():
             keyboard.append(
                 [
                     InlineKeyboardButton(
-                        house_id0,
-                        callback_data=house_name0,
+                        house_name0,
+                        callback_data=house_id0,
                     )
                 ]
             )
@@ -31,12 +31,12 @@ def create_select_house():
             keyboard.append(
                 [
                     InlineKeyboardButton(
-                        house_id0,
-                        callback_data=house_name0,
+                        house_name0,
+                        callback_data=house_id0,
                     ),
                     InlineKeyboardButton(
-                        house_id1,
-                        callback_data=house_name1,
+                        house_name1,
+                        callback_data=house_id1,
                     ),
                 ]
             )
