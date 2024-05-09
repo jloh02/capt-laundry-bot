@@ -54,7 +54,7 @@ def create_select_house():
         send_message_method = (
             update.callback_query.edit_message_text
             if update.callback_query
-            else update.message.reply_text
+            else update.effective_message.reply_text
         )
 
         await send_message_method(

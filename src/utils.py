@@ -19,7 +19,7 @@ def with_house_context(callback):
     select_house = create_select_house()
 
     async def contexted_callback(update: Update, context: CallbackContext):
-        house = storage.get_house(update.message.chat_id)
+        house = storage.get_house(update.effective_message.chat_id)
         if not house:
             context.chat_data.update({"callback": callback})
             return await select_house(update, context)

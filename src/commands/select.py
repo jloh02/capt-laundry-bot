@@ -43,7 +43,7 @@ def create_select_menu():
         send_message_method = (
             update.callback_query.edit_message_text
             if update.callback_query
-            else update.message.reply_text
+            else update.effective_message.reply_text
         )
         await send_message_method(
             f"{constants.HOUSES.get(context.chat_data.get("house"))}\n\nPlease choose a service:",

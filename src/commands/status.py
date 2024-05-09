@@ -34,7 +34,7 @@ def create_status_command(machines: dict[str, dict[str, Machine]]):
         send_message_method = (
             update.callback_query.edit_message_text
             if update.callback_query
-            else update.message.reply_text
+            else update.effective_message.reply_text
         )
 
         await send_message_method(reply_text, reply_markup=keyboard_markup)

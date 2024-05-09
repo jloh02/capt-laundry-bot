@@ -21,14 +21,14 @@ def set_timer_machine(machines: dict[str, dict[str, Machine]]):
 
         machine_name = machine.get_name()
 
-        if not (machine.start_machine(update.effective_message.chat.username, chat_id)):
+        if not (machine.start_machine(update.effective_user.username, chat_id)):
             text = f"{machine_name} is currently in use. Please come back again later!"
             await query.edit_message_text(text=text)
         else:
             logger.info(
                 f"{update.effective_user.username} started {house_id} {machine_name}"
             )
-            text = f"Timer Set for {Machine.COMPLETION_TIME // 60}mins for {machine_name}. Please come back again!"
+            text = f"Timer Set for {Machine.COMPLETION_TIME // 60}mins for {house_id} {machine_name}. Please come back again!"
             await query.edit_message_text(text=text)
 
         return ConversationHandler.END
