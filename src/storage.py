@@ -67,7 +67,7 @@ def set_laundry_timer(house:str, machine_name: str, curr_user: str, end_time: da
     timestamp = int(end_time.timestamp())
     timer_data_cache.update({concatenate_house_machine(house, machine_name):{"currUser": curr_user, "endTime": timestamp}})
     write_timers()
-    write_alarms(curr_user, timestamp, chat_id)
+    write_alarms(curr_user, f"{house} {machine_name}", timestamp, chat_id)
 
 def get_laundry_timer(house:str, machine_name: str) -> tuple[str, datetime.datetime]:
     data = timer_data_cache.get(concatenate_house_machine(house, machine_name))
@@ -75,9 +75,9 @@ def get_laundry_timer(house:str, machine_name: str) -> tuple[str, datetime.datet
         return (data.get("currUser"), datetime.datetime.fromtimestamp(data.get("endTime")))
     return ("", None)
 
-def write_alarms(curr_user: str, end_timestamp: int, chat_id: int):
+def write_alarms(curr_user: str, machine_house_name:str, end_timestamp: int, chat_id: int):
     with open(get_alarm_path(), "a") as f:
-        f.write(f"{end_timestamp} | {curr_user} | {chat_id} \n")
+        f.write(f"{end_timestamp} | {machine_house_name} | {curr_user} | {chat_id} \n")
 
 def check_alarms() -> list[tuple[str, str, int]]:
     if not os.path.isfile(get_alarm_path()):
@@ -89,9 +89,10 @@ def check_alarms() -> list[tuple[str, str, int]]:
         alarms = []
         lines = f.readlines()
         for line in lines:
-            end_timestamp, curr_user, chat_id = line.split(" | ")
+            line = line.strip()
+            end_timestamp, machine_house_name, curr_user, chat_id = line.split(" | ")
             if now > int(end_timestamp):
-                alarms.append((curr_user, chat_id))
+                alarms.append((curr_user, chat_id, machine_house_name))
             else: 
                 rem_lines.append(line)
         f.seek(0)

@@ -1,6 +1,7 @@
 import logging
 import constants
 from machine import Machine
+from utils import create_select_house_callback
 from telegram import (
     Update,
     InlineKeyboardButton,
@@ -30,11 +31,7 @@ def create_double_confirm(machines: dict[str, dict[str, Machine]]):
         await query.answer()
 
         if query.data == constants.ConvState.SelectHouse:
-            logger.info(
-                f"{update.effective_user.username} selected change house from double_confirm"
-            )
-            context.chat_data.update({"callback": select_menu})
-            return await select_house(update, context)
+            return await create_select_house_callback(select_menu)(update, context)
 
         machine_id = query.data
         machine = machines.get(context.chat_data.get("house")).get(machine_id)

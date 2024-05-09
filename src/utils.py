@@ -1,8 +1,11 @@
 import datetime
+import logging
 import storage
 from select_house import create_select_house
 from telegram import Update
 from telegram.ext import CallbackContext
+
+logger = logging.getLogger("utils")
 
 
 # Returns True if end_time is None because timer not set --> not being used
@@ -24,3 +27,16 @@ def with_house_context(callback):
         return await callback(update, context)
 
     return contexted_callback
+
+
+def create_select_house_callback(callback):
+    select_house = create_select_house()
+
+    async def select_house_with_callback(update: Update, context: CallbackContext):
+        logger.info(
+            f"{update.effective_user.username} selected change house from double_confirm"
+        )
+        context.chat_data.update({"callback": callback})
+        return await select_house(update, context)
+
+    return select_house_with_callback

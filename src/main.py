@@ -14,6 +14,7 @@ from telegram.ext import (
 from machine import Machine
 from double_confirm import create_double_confirm
 from select_house import select_house_completed
+from status_select_house import create_status_select_house
 from set_timer_machine import set_timer_machine
 from config import config, read_dotenv
 from utils import with_house_context
@@ -47,7 +48,7 @@ for house_id in constants.HOUSES.keys():
     )
 
 COMMANDS_DICT = {
-    "start": "Display help page and version",
+    "start": "Display help page",
     "select": constants.SELECT_COMMAND_DESCRIPTION,
     "status": constants.STATUS_COMMAND_DESCRIPTION,
 }
@@ -81,6 +82,9 @@ def main():
             constants.ConvState.SelectHouse: [
                 CallbackQueryHandler(select_house_completed)
             ],
+            constants.ConvState.StatusSelectHouse: [
+                CallbackQueryHandler(create_status_select_house(MACHINES))
+            ],
         },
         fallbacks=COMMANDS,
     )
@@ -107,11 +111,11 @@ def main():
 
 
 async def send_alarms(context=None):
-    for curr_user, chat_id in storage.check_alarms():
+    for curr_user, chat_id, machine_house_name in storage.check_alarms():
         logger.info(f"Sending alarm to {curr_user} in chat {chat_id}")
         await TBOT.send_message(
             chat_id=chat_id,
-            text=f"@{curr_user} {constants.COMPLETION_MESSAGE}",
+            text=f"@{curr_user} your clothes from {machine_house_name} are ready for collection! Please collect them now so that others may use it!",
         )
 
 
