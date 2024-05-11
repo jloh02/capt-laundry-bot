@@ -10,7 +10,6 @@ from telegram import (
 from telegram.ext import (
     CallbackContext,
 )
-from select_house import create_select_house
 from commands.select import create_select_menu
 
 logger = logging.getLogger("double_confirm")
@@ -23,7 +22,6 @@ def create_double_confirm(machines: dict[str, dict[str, Machine]]):
     if double_confirm_global:
         return double_confirm_global
 
-    select_house = create_select_house()
     select_menu = create_select_menu()
 
     async def double_confirm(update: Update, context: CallbackContext) -> int:
@@ -34,7 +32,9 @@ def create_double_confirm(machines: dict[str, dict[str, Machine]]):
             return await create_select_house_callback(select_menu)(update, context)
 
         machine_id = query.data
-        machine = machines.get(context.chat_data.get("house")).get(machine_id)
+        machine = machines.get(
+            context.chat_data.get(constants.CHAT_DATA_KEY_HOUSE)
+        ).get(machine_id)
 
         if machine == None:
             raise Exception(f"Unknown machine {machine_id}")

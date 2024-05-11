@@ -1,4 +1,5 @@
 import logging
+import constants
 from machine import Machine
 from telegram.ext import ConversationHandler, CallbackContext
 from telegram import Update
@@ -13,7 +14,7 @@ def set_timer_machine(machines: dict[str, dict[str, Machine]]):
         await query.answer()
 
         machine_id = query.data.split("|")[1].strip()
-        house_id = context.chat_data.get("house")
+        house_id = context.chat_data.get(constants.CHAT_DATA_KEY_HOUSE)
         machine = machines.get(house_id).get(machine_id)
 
         if machine == None:

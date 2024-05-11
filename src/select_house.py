@@ -75,9 +75,9 @@ async def select_house_completed(update: Update, context: CallbackContext):
     logger.info(
         f"{update.effective_user.username} selected house for chat {update.effective_chat.id}: {house}"
     )
-    context.chat_data.update({"house": house})
+    context.chat_data.update({constants.CHAT_DATA_KEY_HOUSE: house})
     storage.write_house(update.effective_chat.id, house)
 
-    callback = context.chat_data.get("callback")
+    callback = context.chat_data.get(constants.CHAT_DATA_KEY_CALLBACK)
 
     return await callback(update, context) if callback else ConversationHandler.END

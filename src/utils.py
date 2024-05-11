@@ -1,6 +1,7 @@
 import datetime
 import logging
 import storage
+import constants
 from select_house import create_select_house
 from telegram import Update
 from telegram.ext import CallbackContext
@@ -21,9 +22,9 @@ def with_house_context(callback):
     async def contexted_callback(update: Update, context: CallbackContext):
         house = storage.get_house(update.effective_message.chat_id)
         if not house:
-            context.chat_data.update({"callback": callback})
+            context.chat_data.update({constants.CHAT_DATA_KEY_CALLBACK: callback})
             return await select_house(update, context)
-        context.chat_data.update({"house": house})
+        context.chat_data.update({constants.CHAT_DATA_KEY_HOUSE: house})
         return await callback(update, context)
 
     return contexted_callback
@@ -36,7 +37,7 @@ def create_select_house_callback(callback):
         logger.info(
             f"{update.effective_user.username} selected change house from double_confirm"
         )
-        context.chat_data.update({"callback": callback})
+        context.chat_data.update({constants.CHAT_DATA_KEY_CALLBACK: callback})
         return await select_house(update, context)
 
     return select_house_with_callback
