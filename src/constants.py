@@ -1,11 +1,11 @@
 from enum import Enum
 
 HOUSES = {
-    "ROC": "ROC",
-    "Dragon": "\U0001F334\U0001F340\U0001F409 Dragon \U0001F409\U0001F340\U0001F334",
-    "Garuda": "Garuda",
-    "Phoenix": "Phoenix",
-    "Tulpar": "Tulpar",
+    "ROC": "\U0001F499\U0001F43A ROC \U0001F43A\U0001F499",
+    "Dragon": "\U0001F340\U0001F409 Dragon \U0001F409\U0001F340",
+    "Garuda": "\U0001F34C\U0001F648 Garuda \U0001F648\U0001F34C",
+    "Phoenix": "\U0001F525\U0001F425 Phoenix \U0001F425\U0001F525",
+    "Tulpar": "\U0001F5A4\U0001F434 Tulpar \U0001F434\U0001F5A4",
 }
 MACHINE_NAMES = ["Dryer One", "Dryer Two", "Washer One", "Washer Two"]
 
