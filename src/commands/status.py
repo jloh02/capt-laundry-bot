@@ -26,7 +26,8 @@ def create_status_command(machines: dict[str, dict[str, Machine]]):
 
     async def status(update: Update, context: CallbackContext):
         logger.info(f"{update.effective_user.username} started /status")
-        house_id = context.chat_data.get(constants.CHAT_DATA_KEY_HOUSE)
+
+        house_id = context.user_data.get(constants.USER_DATA_KEY_HOUSE)
         reply_text = f"Status of Laundry Machines:\n{constants.HOUSES.get(house_id)}"
         for machine in machines.get(house_id).values():
             reply_text += f"\n\n{machine.get_name()}: {machine.status()}"
@@ -37,7 +38,8 @@ def create_status_command(machines: dict[str, dict[str, Machine]]):
             else update.effective_message.reply_text
         )
 
-        await send_message_method(reply_text, reply_markup=keyboard_markup)
+        message = await send_message_method(reply_text, reply_markup=keyboard_markup)
+        context.user_data.update({constants.USER_DATA_KEY_BOT_MSG: message})
 
         return constants.ConvState.StatusSelectHouse
 

@@ -22,9 +22,9 @@ def with_house_context(callback):
     async def contexted_callback(update: Update, context: CallbackContext):
         house = storage.get_house(update.effective_message.chat_id)
         if not house:
-            context.chat_data.update({constants.CHAT_DATA_KEY_CALLBACK: callback})
+            context.user_data.update({constants.USER_DATA_KEY_CALLBACK: callback})
             return await select_house(update, context)
-        context.chat_data.update({constants.CHAT_DATA_KEY_HOUSE: house})
+        context.user_data.update({constants.USER_DATA_KEY_HOUSE: house})
         return await callback(update, context)
 
     return contexted_callback
@@ -34,10 +34,8 @@ def create_select_house_callback(callback):
     select_house = create_select_house()
 
     async def select_house_with_callback(update: Update, context: CallbackContext):
-        logger.info(
-            f"{update.effective_user.username} selected change house from double_confirm"
-        )
-        context.chat_data.update({constants.CHAT_DATA_KEY_CALLBACK: callback})
+        logger.info(f"{update.effective_user.username} selected change house from menu")
+        context.user_data.update({constants.USER_DATA_KEY_CALLBACK: callback})
         return await select_house(update, context)
 
     return select_house_with_callback

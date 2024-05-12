@@ -9,6 +9,8 @@ from telegram.ext import (
     CallbackContext,
 )
 
+import datetime
+
 logger = logging.getLogger("select")
 
 select_menu_global = None
@@ -60,10 +62,13 @@ def create_select_menu():
             if update.callback_query
             else update.effective_message.reply_text
         )
-        await send_message_method(
-            f"{constants.HOUSES.get(context.chat_data.get(constants.CHAT_DATA_KEY_HOUSE))}\n\nPlease choose a service:",
+
+        bot_msg = await send_message_method(
+            f"{constants.HOUSES.get(context.user_data.get(constants.USER_DATA_KEY_HOUSE))}\n\nPlease choose a service:",
             reply_markup=keyboard_markup,
         )
+        context.user_data.update({constants.USER_DATA_KEY_BOT_MSG: bot_msg})
+
         return constants.ConvState.RequestConfirmSelect
 
     select_menu_global = select_menu

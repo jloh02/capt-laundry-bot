@@ -15,5 +15,6 @@ def read_dotenv():
             "BASE_PATH": os.getenv("BASE_PATH", "./data"),
             "PORT": os.getenv("PORT", 8080),
             "TIMER_DURATION_MINUTES": int(os.getenv("TIMER_DURATION_MINUTES", 34)),
+            "CONVO_TIMEOUT_SECONDS": int(os.getenv("CONVO_TIMEOUT_SECONDS", 300)),
         }
     )

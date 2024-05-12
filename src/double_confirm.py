@@ -33,7 +33,7 @@ def create_double_confirm(machines: dict[str, dict[str, Machine]]):
 
         machine_id = query.data
         machine = machines.get(
-            context.chat_data.get(constants.CHAT_DATA_KEY_HOUSE)
+            context.user_data.get(constants.USER_DATA_KEY_HOUSE)
         ).get(machine_id)
 
         if machine == None:

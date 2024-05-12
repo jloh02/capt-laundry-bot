@@ -1,7 +1,8 @@
 from enum import Enum
 
-CHAT_DATA_KEY_HOUSE = "house"
-CHAT_DATA_KEY_CALLBACK = "callback"
+USER_DATA_KEY_HOUSE = "house"
+USER_DATA_KEY_CALLBACK = "callback"
+USER_DATA_KEY_BOT_MSG = "bot_msg"
 
 HOUSES = {
     "ROC": "\U0001F499\U0001F43A ROC \U0001F43A\U0001F499",

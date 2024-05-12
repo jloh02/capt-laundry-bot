@@ -10,12 +10,14 @@ from telegram.ext import (
     CallbackContext,
     CallbackQueryHandler,
     ConversationHandler,
+    MessageHandler,
 )
 from machine import Machine
 from double_confirm import create_double_confirm
 from select_house import select_house_completed
 from status_select_house import create_status_select_house
 from set_timer_machine import set_timer_machine
+from convo_timeout import timeout_on_callback_query, timeout_on_message
 from config import config, read_dotenv
 from utils import with_house_context
 
@@ -61,16 +63,15 @@ def main():
         Application.builder().token(config.get("TELEGRAM_BOT_API_KEY")).build()
     )
 
-    COMMANDS = [
-        CommandHandler("start", commands.start),
-        CommandHandler("select", with_house_context(commands.create_select_menu())),
-        CommandHandler(
-            "status",
-            with_house_context(commands.create_status_command(MACHINES)),
-        ),
-    ]
     conv_handler = ConversationHandler(
-        entry_points=COMMANDS,
+        entry_points=[
+            CommandHandler("start", commands.start),
+            CommandHandler("select", with_house_context(commands.create_select_menu())),
+            CommandHandler(
+                "status",
+                with_house_context(commands.create_status_command(MACHINES)),
+            ),
+        ],
         states={
             constants.ConvState.RequestConfirmSelect: [
                 CallbackQueryHandler(create_double_confirm(MACHINES))
@@ -85,8 +86,16 @@ def main():
             constants.ConvState.StatusSelectHouse: [
                 CallbackQueryHandler(create_status_select_house(MACHINES))
             ],
+            ConversationHandler.TIMEOUT: [
+                MessageHandler(None, timeout_on_message),
+                CallbackQueryHandler(timeout_on_callback_query),
+            ],
         },
-        fallbacks=COMMANDS,
+        fallbacks=[],
+        allow_reentry=True,
+        conversation_timeout=datetime.timedelta(
+            seconds=config.get("CONVO_TIMEOUT_SECONDS", 300)
+        ),
     )
 
     application.add_handler(conv_handler)

@@ -14,7 +14,7 @@ def set_timer_machine(machines: dict[str, dict[str, Machine]]):
         await query.answer()
 
         machine_id = query.data.split("|")[1].strip()
-        house_id = context.chat_data.get(constants.CHAT_DATA_KEY_HOUSE)
+        house_id = context.user_data.get(constants.USER_DATA_KEY_HOUSE)
         machine = machines.get(house_id).get(machine_id)
 
         if machine == None:
