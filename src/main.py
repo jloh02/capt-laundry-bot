@@ -127,10 +127,11 @@ def main():
 
 
 async def send_alarms(context=None):
-    for curr_user, chat_id, machine_house_name in storage.check_alarms():
-        logger.info(f"Sending alarm to {curr_user} in chat {chat_id}")
+    for curr_user, chat_id, thread_id, machine_house_name in storage.check_alarms():
+        logger.info(f"Sending alarm to {curr_user} in chat {chat_id}#{thread_id}")
         await TBOT.send_message(
             chat_id=chat_id,
+            message_thread_id=thread_id,
             text=f"@{curr_user} your clothes from {machine_house_name} are ready for collection! Please collect them now so that others may use it!",
         )
 

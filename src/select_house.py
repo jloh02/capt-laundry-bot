@@ -73,10 +73,10 @@ async def select_house_completed(update: Update, context: CallbackContext):
 
     house = query.data
     logger.info(
-        f"{update.effective_user.username} selected house for chat {update.effective_chat.id}: {house}"
+        f"{update.effective_user.username} selected house for chat {update.effective_user.id}: {house}"
     )
     context.user_data.update({constants.USER_DATA_KEY_HOUSE: house})
-    storage.write_house(update.effective_chat.id, house)
+    storage.write_house(update.effective_user.id, house)
 
     callback = context.user_data.get(constants.USER_DATA_KEY_CALLBACK)
     context.user_data.update({constants.USER_DATA_KEY_CALLBACK: None})

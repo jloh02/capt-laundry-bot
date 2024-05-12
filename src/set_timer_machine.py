@@ -9,7 +9,9 @@ logger = logging.getLogger("set_timer_machine")
 
 def set_timer_machine(machines: dict[str, dict[str, Machine]]):
     async def set_timer(update: Update, context: CallbackContext):
-        user_id = update.effective_message.from_user.id
+        chat_id = update.effective_chat.id
+        thread_id = update.effective_message.message_thread_id
+        username = update.effective_user.username
         query = update.callback_query
         await query.answer()
 
@@ -22,14 +24,13 @@ def set_timer_machine(machines: dict[str, dict[str, Machine]]):
 
         machine_name = machine.get_name()
 
-        if not (machine.start_machine(update.effective_user.username, user_id)):
+        machine_started = machine.start_machine(username, chat_id, thread_id)
+        if not machine_started:
             text = f"{machine_name} is currently in use. Please come back again later!"
             await query.edit_message_text(text=text)
         else:
-            logger.info(
-                f"{update.effective_user.username} started {house_id} {machine_name}"
-            )
-            text = f"Timer Set for {Machine.COMPLETION_TIME // 60}mins for {house_id} {machine_name}. Please come back again!"
+            logger.info(f"{username} started {house_id} {machine_name}")
+            text = f"Timer Set for {Machine.COMPLETION_TIME // 60}mins for {house_id} {machine_name} by @{username}!"
             await query.edit_message_text(text=text)
 
         return ConversationHandler.END
