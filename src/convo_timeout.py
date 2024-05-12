@@ -4,7 +4,7 @@ from telegram import Update
 from telegram.ext import CallbackContext, ConversationHandler
 
 
-async def timeout_on_message(context: CallbackContext):
+async def timeout_on_message(update: Update, context: CallbackContext):
     await delete_inline_keyboard_if_available(context)
     return ConversationHandler.END
 

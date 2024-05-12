@@ -9,7 +9,7 @@ logger = logging.getLogger("set_timer_machine")
 
 def set_timer_machine(machines: dict[str, dict[str, Machine]]):
     async def set_timer(update: Update, context: CallbackContext):
-        chat_id = update.effective_message.chat_id
+        user_id = update.effective_message.from_user.id
         query = update.callback_query
         await query.answer()
 
@@ -22,7 +22,7 @@ def set_timer_machine(machines: dict[str, dict[str, Machine]]):
 
         machine_name = machine.get_name()
 
-        if not (machine.start_machine(update.effective_user.username, chat_id)):
+        if not (machine.start_machine(update.effective_user.username, user_id)):
             text = f"{machine_name} is currently in use. Please come back again later!"
             await query.edit_message_text(text=text)
         else:

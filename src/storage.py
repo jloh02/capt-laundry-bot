@@ -25,10 +25,10 @@ def read_house():
     with open(get_house_path(), "r") as f:
         house_data_cache.update(json.load(f))
 
-def write_house(chat_id:int, house:str):
+def write_house(user_id:int, house:str):
     global house_data_cache
     
-    house_data_cache.update({str(chat_id):house})
+    house_data_cache.update({str(user_id):house})
     dir = os.path.dirname(get_house_path())
     if not os.path.isdir(dir):
         os.makedirs(dir)

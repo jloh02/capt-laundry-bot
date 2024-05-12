@@ -36,7 +36,7 @@ class Machine(ABC):
         curr_user, end_time = storage.get_laundry_timer(self.house_id, self.name)
         return curr_user
 
-    def start_machine(self, new_user: str, chat_id: int):
+    def start_machine(self, new_user: str, user_id: int):
         _, end_time = storage.get_laundry_timer(self.house_id, self.name)
         if not utils.is_available(end_time):
             return False
@@ -46,6 +46,6 @@ class Machine(ABC):
             )
             new_curr_user = new_user
             storage.set_laundry_timer(
-                self.house_id, self.name, new_curr_user, new_end_time, chat_id
+                self.house_id, self.name, new_curr_user, new_end_time, user_id
             )
             return True
