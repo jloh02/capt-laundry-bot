@@ -1,12 +1,11 @@
 import constants
-from telegram import Message, Update
+from utils import delete_inline_keyboard_if_available
+from telegram import Update
 from telegram.ext import CallbackContext, ConversationHandler
 
 
-async def timeout_on_message(update: Update, context: CallbackContext):
-    bot_msg = context.user_data.get(constants.USER_DATA_KEY_BOT_MSG)
-    if isinstance(bot_msg, Message):
-        await bot_msg.edit_reply_markup(reply_markup=None)
+async def timeout_on_message(context: CallbackContext):
+    await delete_inline_keyboard_if_available(context)
     return ConversationHandler.END
 
 

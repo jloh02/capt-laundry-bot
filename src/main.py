@@ -19,7 +19,7 @@ from status_select_house import create_status_select_house
 from set_timer_machine import set_timer_machine
 from convo_timeout import timeout_on_callback_query, timeout_on_message
 from config import config, read_dotenv
-from utils import with_house_context
+from utils import with_house_context, with_deleted_previous_keyboards
 
 read_dotenv()
 storage.read_timers()
@@ -66,10 +66,17 @@ def main():
     conv_handler = ConversationHandler(
         entry_points=[
             CommandHandler("start", commands.start),
-            CommandHandler("select", with_house_context(commands.create_select_menu())),
+            CommandHandler(
+                "select",
+                with_deleted_previous_keyboards(
+                    with_house_context(commands.create_select_menu())
+                ),
+            ),
             CommandHandler(
                 "status",
-                with_house_context(commands.create_status_command(MACHINES)),
+                with_deleted_previous_keyboards(
+                    with_house_context(commands.create_status_command(MACHINES))
+                ),
             ),
         ],
         states={

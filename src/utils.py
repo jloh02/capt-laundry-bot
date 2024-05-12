@@ -3,7 +3,7 @@ import logging
 import storage
 import constants
 from select_house import create_select_house
-from telegram import Update
+from telegram import Message, Update
 from telegram.ext import CallbackContext
 
 logger = logging.getLogger("utils")
@@ -39,3 +39,22 @@ def create_select_house_callback(callback):
         return await select_house(update, context)
 
     return select_house_with_callback
+
+
+def with_deleted_previous_keyboards(callback):
+    async def callback_with_deleted_previous_keyboards(
+        update: Update, context: CallbackContext
+    ):
+        await delete_inline_keyboard_if_available(context)
+        return await callback(update, context)
+
+    return callback_with_deleted_previous_keyboards
+
+
+async def delete_inline_keyboard_if_available(context: CallbackContext):
+    bot_msg = context.user_data.get(constants.USER_DATA_KEY_BOT_MSG)
+    if isinstance(bot_msg, Message):
+        try:
+            await bot_msg.edit_reply_markup(reply_markup=None)
+        except Exception:
+            pass
