@@ -19,12 +19,12 @@ class Machine(ABC):
     def get_name(self):
         return self.name
 
-    def status(self):
+    def status(self, mention_user: bool = True):
         curr_user, end_time = storage.get_laundry_timer(self.house_id, self.name)
         if utils.is_available(end_time):
             reply = f"AVAILABLE \U00002705"
             if curr_user:
-                reply += f', last used by @{curr_user} ({end_time.astimezone(SGT_TIMEZONE).strftime("%d/%m/%Y %I:%M%p")})'
+                reply += f', last used by @{'' if mention_user else ' '}{curr_user} ({end_time.astimezone(SGT_TIMEZONE).strftime("%d/%m/%Y %I:%M%p")})'
             return reply
         else:
             time_delta = end_time - datetime.datetime.now()

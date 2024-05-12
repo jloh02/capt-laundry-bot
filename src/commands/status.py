@@ -1,7 +1,7 @@
 import logging
 import constants
 from machine import Machine
-from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram import Chat, Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import CallbackContext
 
 logger = logging.getLogger("status")
@@ -28,9 +28,14 @@ def create_status_command(machines: dict[str, dict[str, Machine]]):
         logger.info(f"{update.effective_user.username} started /status")
 
         house_id = context.user_data.get(constants.USER_DATA_KEY_HOUSE)
-        reply_text = f"Status of Laundry Machines:\n{constants.HOUSES.get(house_id)}"
+        reply_text = f"{constants.HOUSES.get(house_id)}"
+        dm = update.effective_chat.type == Chat.PRIVATE
+
         for machine in machines.get(house_id).values():
-            reply_text += f"\n\n{machine.get_name()}: {machine.status()}"
+            reply_text += f"\n\n{machine.get_name()}: {machine.status(dm)}"
+
+        if not dm:
+            reply_text += f"\n\n Use /status in DMs to @ people in status. You can DM me using @{context.bot.username}"
 
         send_message_method = (
             update.callback_query.edit_message_text
