@@ -8,5 +8,15 @@ services:
     environment:
       BASE_PATH: /var/lib/capt_laundry_bot
     restart: unless-stopped
+    ports:
+      - "3000:80"
+  nginx:
+    image: nginx:latest
+    volumes:
+      - static-volume:/usr/share/nginx/html
+    ports:
+      - "80:80"
+    depends_on:
+      - laundry-bot
 volumes:
   static-volume:
