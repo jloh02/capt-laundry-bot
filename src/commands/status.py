@@ -35,7 +35,7 @@ def create_status_command(machines: dict[str, dict[str, Machine]]):
             reply_text += f"\n\n{machine.get_name()}: {machine.status(dm)}"
 
         if not dm:
-            reply_text += f"\n\n Use /status in DMs to @ people in status. You can DM me using @{context.bot.username}"
+            reply_text += f"\n\nUse /status in DMs to @ people in status. You can DM me using @{context.bot.username}"
 
         send_message_method = (
             update.callback_query.edit_message_text
