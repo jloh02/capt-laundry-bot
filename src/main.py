@@ -117,7 +117,7 @@ def main():
     )
 
     if config.get("PRODUCTION"):
-        print("Running on webhook")
+        logger.info("Running on webhook")
         application.run_webhook(
             listen="0.0.0.0",
             port=config.get("PORT", 3000),
