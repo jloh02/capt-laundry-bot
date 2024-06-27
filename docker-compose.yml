@@ -8,25 +8,33 @@ services:
     environment:
       BASE_PATH: /var/lib/capt_laundry_bot
     restart: unless-stopped
-    ports:
-      - "3000:80"
+    expose:
+      - "3000"
+    networks:
+      - web
   nginx:
     image: nginx:latest
     ports:
       - "80:80"
+      - "443:443"
+    networks:
+      - web
     depends_on:
       - laundry-bot
     restart: always
     volumes:
       - static-volume:/usr/share/nginx/html
-      - ./nginx/conf/:/etc/nginx/conf.d/:ro
+      - ./nginx/:/etc/nginx/conf.d/:ro
       - ./certbot/www/:/var/www/certbot/:ro
+      - ./certbot/conf/:/etc/letsencrypt/:ro
   certbot:
     image: certbot/certbot:latest
-    depends_on:
-      - nginx
     volumes:
       - ./certbot/www/:/var/www/certbot/:rw
       - ./certbot/conf/:/etc/letsencrypt/:rw
+
 volumes:
   static-volume:
+
+networks:
+  web:
