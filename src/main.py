@@ -87,8 +87,9 @@ def main():
                 CallbackQueryHandler(backtomenu, pattern=r"^no$"),
                 CallbackQueryHandler(set_timer_machine(MACHINES), pattern=r"^yes|.*$"),
             ],
-            constants.ConvState.SetDuration: [  # Added SetTimer state for duration selection
-                CallbackQueryHandler(set_duration(MACHINES))
+            constants.ConvState.SetDuration: [
+                CallbackQueryHandler(backtomenu, pattern=r"^cancel$"),
+                CallbackQueryHandler(set_duration(MACHINES)),
             ],
             constants.ConvState.SelectHouse: [
                 CallbackQueryHandler(select_house_completed)

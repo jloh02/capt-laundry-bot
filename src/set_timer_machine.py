@@ -29,6 +29,10 @@ def set_timer_machine(machines: dict[str, dict[str, Machine]]):
 
         # Create inline keyboard with wash duration options
 
+        CANCEL_BUTTON = InlineKeyboardButton(
+            "Cancel",
+            callback_data="cancel",
+        )
         if "washer" in machine_name.lower():
             reply_markup = InlineKeyboardMarkup(
                 list(
@@ -42,6 +46,7 @@ def set_timer_machine(machines: dict[str, dict[str, Machine]]):
                         config.get("WASHER_TIMER_DURATION_MINUTES"),
                     )
                 )
+                + [[CANCEL_BUTTON]]
             )
         else:
             reply_markup = InlineKeyboardMarkup(
@@ -56,6 +61,7 @@ def set_timer_machine(machines: dict[str, dict[str, Machine]]):
                     ),
                     config.get("DRYER_TIMER_DURATION_MINUTES"),
                 )
+                + [[CANCEL_BUTTON]]
             )
 
         # Ask user to select the duration before starting the machine
