@@ -14,12 +14,19 @@ def read_dotenv():
             "PRODUCTION": os.getenv("PRODUCTION") == "True",
             "BASE_PATH": os.getenv("BASE_PATH", "./data"),
             "PORT": os.getenv("PORT", 3000),
-            "WASHER_TIMER_DURATION_MINUTES_LONG": int(os.getenv("WASHER_TIMER_DURATION_MINUTES_LONG")),
-            "WASHER_TIMER_DURATION_MINUTES_MID": int(os.getenv("WASHER_TIMER_DURATION_MINUTES_MID")),
-            "WASHER_TIMER_DURATION_MINUTES_SHORT": int(os.getenv("WASHER_TIMER_DURATION_MINUTES_SHORT")),
-            "DRYER_TIMER_DURATION_MINUTES_LONG": int(os.getenv("DRYER_TIMER_DURATION_MINUTES_LONG")),
-            "DRYER_TIMER_DURATION_MINUTES_MID": int(os.getenv("DRYER_TIMER_DURATION_MINUTES_MID")),
-            "DRYER_TIMER_DURATION_MINUTES_SHORT": int(os.getenv("DRYER_TIMER_DURATION_MINUTES_SHORT")),
             "CONVO_TIMEOUT_SECONDS": int(os.getenv("CONVO_TIMEOUT_SECONDS", 300)),
+            ## Convert comma-separated configs to int array
+            "WASHER_TIMER_DURATION_MINUTES": list(
+                map(
+                    int,
+                    os.getenv("WASHER_TIMER_DURATION_MINUTES", "30,32,34").split(","),
+                )
+            ),
+            "DYER_TIMER_DURATION_MINUTES": list(
+                map(
+                    int,
+                    os.getenv("DRYER_TIMER_DURATION_MINUTES", "30,45,60").split(","),
+                )
+            ),
         }
     )

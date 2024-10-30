@@ -88,7 +88,7 @@ def main():
                 CallbackQueryHandler(set_timer_machine(MACHINES), pattern=r"^yes|.*$"),
             ],
             constants.ConvState.SetDuration: [  # Added SetTimer state for duration selection
-                CallbackQueryHandler(lambda update, context: set_duration(MACHINES, update, context))
+                CallbackQueryHandler(set_duration(MACHINES))
             ],
             constants.ConvState.SelectHouse: [
                 CallbackQueryHandler(select_house_completed)
@@ -116,7 +116,7 @@ def main():
     )
 
     application.job_queue.run_repeating(
-        send_alarms, interval=datetime.timedelta(seconds=60)
+        send_alarms, interval=datetime.timedelta(seconds=30)
     )
 
     if config.get("PRODUCTION"):

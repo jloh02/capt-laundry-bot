@@ -35,14 +35,19 @@ class Machine(ABC):
         curr_user, end_time = storage.get_laundry_timer(self.house_id, self.name)
         return curr_user
 
-    def start_machine(self, new_user: str, chat_id: int, thread_id: int | None, duration: str):
+    def start_machine(
+        self,
+        new_user: str,
+        chat_id: int,
+        thread_id: int | None,
+        duration_in_seconds: int,
+    ):
         _, end_time = storage.get_laundry_timer(self.house_id, self.name)
         if not utils.is_available(end_time):
             return False
         else:
-            COMPLETION_TIME = config.get(duration) * 60
             new_end_time = datetime.datetime.now() + datetime.timedelta(
-                seconds=COMPLETION_TIME
+                seconds=duration_in_seconds * 60
             )
             new_curr_user = new_user
             storage.set_laundry_timer(
