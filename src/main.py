@@ -81,7 +81,8 @@ def main():
         ],
         states={
             constants.ConvState.RequestConfirmSelect: [
-                CallbackQueryHandler(create_double_confirm(MACHINES))
+                CallbackQueryHandler(backtomenu, pattern=r"^cancel$"),
+                CallbackQueryHandler(create_double_confirm(MACHINES)),
             ],
             constants.ConvState.ConfirmSelect: [
                 CallbackQueryHandler(backtomenu, pattern=r"^no$"),
@@ -90,7 +91,6 @@ def main():
                 ),
             ],
             constants.ConvState.SelectDuration: [
-                CallbackQueryHandler(backtomenu, pattern=r"^cancel$"),
                 CallbackQueryHandler(select_duration(MACHINES)),
             ],
             constants.ConvState.SelectHouse: [
