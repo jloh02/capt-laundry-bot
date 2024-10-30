@@ -17,6 +17,7 @@ from double_confirm import create_double_confirm
 from select_house import select_house_completed
 from status_select_house import create_status_select_house
 from set_timer_machine import set_timer_machine
+from set_duration import set_duration
 from convo_timeout import timeout_on_callback_query, timeout_on_message
 from config import config, read_dotenv
 from utils import with_house_context, with_deleted_previous_keyboards
@@ -62,7 +63,6 @@ def main():
     application = (
         Application.builder().token(config.get("TELEGRAM_BOT_API_KEY")).build()
     )
-
     conv_handler = ConversationHandler(
         entry_points=[
             CommandHandler("start", commands.start),
@@ -86,6 +86,9 @@ def main():
             constants.ConvState.ConfirmSelect: [
                 CallbackQueryHandler(backtomenu, pattern=r"^no$"),
                 CallbackQueryHandler(set_timer_machine(MACHINES), pattern=r"^yes|.*$"),
+            ],
+            constants.ConvState.SetDuration: [  # Added SetTimer state for duration selection
+                CallbackQueryHandler(lambda update, context: set_duration(MACHINES, update, context))
             ],
             constants.ConvState.SelectHouse: [
                 CallbackQueryHandler(select_house_completed)
@@ -113,7 +116,7 @@ def main():
     )
 
     application.job_queue.run_repeating(
-        send_alarms, interval=datetime.timedelta(seconds=30)
+        send_alarms, interval=datetime.timedelta(seconds=60)
     )
 
     if config.get("PRODUCTION"):

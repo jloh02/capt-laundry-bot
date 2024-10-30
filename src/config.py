@@ -14,7 +14,12 @@ def read_dotenv():
             "PRODUCTION": os.getenv("PRODUCTION") == "True",
             "BASE_PATH": os.getenv("BASE_PATH", "./data"),
             "PORT": os.getenv("PORT", 3000),
-            "TIMER_DURATION_MINUTES": int(os.getenv("TIMER_DURATION_MINUTES", 34)),
+            "WASHER_TIMER_DURATION_MINUTES_LONG": int(os.getenv("WASHER_TIMER_DURATION_MINUTES_LONG")),
+            "WASHER_TIMER_DURATION_MINUTES_MID": int(os.getenv("WASHER_TIMER_DURATION_MINUTES_MID")),
+            "WASHER_TIMER_DURATION_MINUTES_SHORT": int(os.getenv("WASHER_TIMER_DURATION_MINUTES_SHORT")),
+            "DRYER_TIMER_DURATION_MINUTES_LONG": int(os.getenv("DRYER_TIMER_DURATION_MINUTES_LONG")),
+            "DRYER_TIMER_DURATION_MINUTES_MID": int(os.getenv("DRYER_TIMER_DURATION_MINUTES_MID")),
+            "DRYER_TIMER_DURATION_MINUTES_SHORT": int(os.getenv("DRYER_TIMER_DURATION_MINUTES_SHORT")),
             "CONVO_TIMEOUT_SECONDS": int(os.getenv("CONVO_TIMEOUT_SECONDS", 300)),
         }
     )

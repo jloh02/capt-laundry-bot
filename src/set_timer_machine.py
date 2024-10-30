@@ -1,8 +1,9 @@
 import logging
 import constants
+from config import config
 from machine import Machine
 from telegram.ext import ConversationHandler, CallbackContext
-from telegram import Update
+from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 
 logger = logging.getLogger("set_timer_machine")
 
@@ -14,6 +15,9 @@ def set_timer_machine(machines: dict[str, dict[str, Machine]]):
         username = update.effective_user.username
         query = update.callback_query
         await query.answer()
+     
+        logger.info(query.data.split("|"))
+
 
         machine_id = query.data.split("|")[1].strip()
         house_id = context.user_data.get(constants.USER_DATA_KEY_HOUSE)
@@ -23,16 +27,30 @@ def set_timer_machine(machines: dict[str, dict[str, Machine]]):
             raise Exception(f"Unknown machine {machine_id}")
 
         machine_name = machine.get_name()
+        
+        # Create inline keyboard with wash duration options
+        washer_keyboard = [
+            [InlineKeyboardButton("30", callback_data=f"{machine_id},WASHER_TIMER_DURATION_MINUTES_SHORT")],
+            [InlineKeyboardButton("32", callback_data=f"{machine_id},WASHER_TIMER_DURATION_MINUTES_MID")],
+            [InlineKeyboardButton("34", callback_data=f"{machine_id},WASHER_TIMER_DURATION_MINUTES_LONG")],
+        ]
 
-        machine_started = machine.start_machine(username, chat_id, thread_id)
-        if not machine_started:
-            text = f"{machine_name} is currently in use. Please come back again later!"
-            await query.edit_message_text(text=text)
+        dryer_keyboard = [
+            [InlineKeyboardButton("30", callback_data=f"{machine_id},DRYER_TIMER_DURATION_MINUTES_SHORT")],
+            [InlineKeyboardButton("45", callback_data=f"{machine_id},DRYER_TIMER_DURATION_MINUTES_MID")],
+            [InlineKeyboardButton("60", callback_data=f"{machine_id},DRYER_TIMER_DURATION_MINUTES_LONG")],
+        ]
+        if "Washer" in machine_name:
+            reply_markup = InlineKeyboardMarkup(washer_keyboard)
         else:
-            logger.info(f"{username} started {house_id} {machine_name}")
-            text = f"Timer Set for {Machine.COMPLETION_TIME // 60}mins for {house_id} {machine_name} by @{username}!"
-            await query.edit_message_text(text=text)
+            reply_markup = InlineKeyboardMarkup(dryer_keyboard)
 
-        return ConversationHandler.END
-
+        # Ask user to select the duration before starting the machine
+        text = f"Please select the wash duration for {machine_name}:"
+        await query.edit_message_text(text=text, reply_markup=reply_markup)
+    
+        return constants.ConvState.SetDuration
+    
     return set_timer
+
+
