@@ -2,44 +2,66 @@ import logging
 import constants
 from machine import Machine
 from config import config
-from telegram.ext import ConversationHandler, CallbackContext
-from telegram import Update
+from telegram.ext import CallbackContext
+from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 
 logger = logging.getLogger("set_duration")
 
 
-def set_duration(machines: dict[str, dict[str, Machine]]):
-    async def set_duration_handler(update: Update, context: CallbackContext):
+def select_duration(machines: dict[str, dict[str, Machine]]):
+    async def select_duration_handler(update: Update, context: CallbackContext):
         query = update.callback_query
         await query.answer()
 
         logger.info(query.data)
 
-        # Extract machine_id and duration from the callback data
-        machine_id, duration_str = query.data.split(",")
+        machine_id = query.data
         house_id = context.user_data.get(constants.USER_DATA_KEY_HOUSE)
         machine = machines.get(house_id).get(machine_id)
+        machine_name = machine.get_name()
 
         if machine is None:
             raise Exception(f"Unknown machine {machine_id}")
 
-        username = update.effective_user.username
-        chat_id = update.effective_chat.id
-        thread_id = update.effective_message.message_thread_id
-
-        # Start the machine with the selected duration
-        machine_started = machine.start_machine(
-            username, chat_id, thread_id, int(duration_str)
+        CANCEL_BUTTON = InlineKeyboardButton(
+            "Cancel",
+            callback_data="cancel",
         )
-
-        if not machine_started:
-            text = f"{machine.get_name()} is currently in use. Please come back again later!"
-            await query.edit_message_text(text=text)
+        if "washer" in machine_name.lower():
+            reply_markup = InlineKeyboardMarkup(
+                [
+                    list(
+                        map(
+                            lambda d: InlineKeyboardButton(
+                                f"{d} mins",
+                                callback_data=f"{machine_id}|{d}",
+                            ),
+                            config.get("WASHER_TIMER_DURATION_MINUTES"),
+                        )
+                    )
+                ]
+                + [[CANCEL_BUTTON]]
+            )
         else:
-            logger.info(f"{username} started {house_id} {machine.get_name()}")
-            text = f"Timer set for {duration_str} mins for {house_id} {machine.get_name()} by @{username}!"
-            await query.edit_message_text(text=text)
+            reply_markup = InlineKeyboardMarkup(
+                [
+                    list(
+                        map(
+                            lambda d: InlineKeyboardButton(
+                                f"{d} mins",
+                                callback_data=f"{machine_id}|{d}",
+                            ),
+                            config.get("DRYER_TIMER_DURATION_MINUTES"),
+                        )
+                    )
+                ]
+                + [[CANCEL_BUTTON]]
+            )
 
-        return ConversationHandler.END
+        # Ask user to select the duration before starting the machine
+        text = f"Please select the duration for {house_id} {machine_name}:"
+        await query.edit_message_text(text=text, reply_markup=reply_markup)
 
-    return set_duration_handler
+        return constants.ConvState.RequestConfirmSelect
+
+    return select_duration_handler

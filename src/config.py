@@ -22,7 +22,7 @@ def read_dotenv():
                     os.getenv("WASHER_TIMER_DURATION_MINUTES", "30,32,34").split(","),
                 )
             ),
-            "DYER_TIMER_DURATION_MINUTES": list(
+            "DRYER_TIMER_DURATION_MINUTES": list(
                 map(
                     int,
                     os.getenv("DRYER_TIMER_DURATION_MINUTES", "30,45,60").split(","),

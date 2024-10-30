@@ -9,8 +9,6 @@ from telegram.ext import (
     CallbackContext,
 )
 
-import datetime
-
 logger = logging.getLogger("select")
 
 select_menu_global = None
@@ -69,7 +67,7 @@ def create_select_menu():
         )
         context.user_data.update({constants.USER_DATA_KEY_BOT_MSG: bot_msg})
 
-        return constants.ConvState.RequestConfirmSelect
+        return constants.ConvState.SelectDuration
 
     select_menu_global = select_menu
     return select_menu

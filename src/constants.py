@@ -19,7 +19,7 @@ class ConvState(str, Enum):
     ConfirmSelect = "ConfirmSelect"
     SelectHouse = "SelectHouse"
     StatusSelectHouse = "StatusSelectHouse"
-    SetDuration = "SetDuration"
+    SelectDuration = "SetDuration"
 
 
 SELECT_COMMAND_DESCRIPTION = "Select the washer/dryer that you want to use"

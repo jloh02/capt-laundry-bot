@@ -28,13 +28,15 @@ def create_double_confirm(machines: dict[str, dict[str, Machine]]):
         query = update.callback_query
         await query.answer()
 
+        logger.info(query.data)
+
         if query.data == constants.ConvState.SelectHouse:
             return await create_select_house_callback(select_menu)(update, context)
 
-        machine_id = query.data
-        machine = machines.get(
-            context.user_data.get(constants.USER_DATA_KEY_HOUSE)
-        ).get(machine_id)
+        house_id = context.user_data.get(constants.USER_DATA_KEY_HOUSE)
+        machine_id = query.data.split("|")[0].strip()
+        duration_str = query.data.split("|")[1].strip()
+        machine = machines.get(house_id).get(machine_id)
 
         if machine == None:
             raise Exception(f"Unknown machine {machine_id}")
@@ -42,10 +44,14 @@ def create_double_confirm(machines: dict[str, dict[str, Machine]]):
         machine_name = machine.get_name()
 
         await query.edit_message_text(
-            text=f"Timer for {machine_name} will begin?",
+            text=f"{duration_str} mins timer for {house_id} {machine_name} will begin?",
             reply_markup=InlineKeyboardMarkup(
                 [
-                    [InlineKeyboardButton("Yes", callback_data=f"yes|{machine_id}")],
+                    [
+                        InlineKeyboardButton(
+                            "Yes", callback_data=f"yes|{machine_id}|{duration_str}"
+                        )
+                    ],
                     [InlineKeyboardButton("No", callback_data="no")],
                 ]
             ),

@@ -17,7 +17,7 @@ from double_confirm import create_double_confirm
 from select_house import select_house_completed
 from status_select_house import create_status_select_house
 from set_timer_machine import set_timer_machine
-from set_duration import set_duration
+from set_duration import select_duration
 from convo_timeout import timeout_on_callback_query, timeout_on_message
 from config import config, read_dotenv
 from utils import with_house_context, with_deleted_previous_keyboards
@@ -85,11 +85,13 @@ def main():
             ],
             constants.ConvState.ConfirmSelect: [
                 CallbackQueryHandler(backtomenu, pattern=r"^no$"),
-                CallbackQueryHandler(set_timer_machine(MACHINES), pattern=r"^yes|.*$"),
+                CallbackQueryHandler(
+                    set_timer_machine(MACHINES), pattern=r"^yes|.*|.*$"
+                ),
             ],
-            constants.ConvState.SetDuration: [
+            constants.ConvState.SelectDuration: [
                 CallbackQueryHandler(backtomenu, pattern=r"^cancel$"),
-                CallbackQueryHandler(set_duration(MACHINES)),
+                CallbackQueryHandler(select_duration(MACHINES)),
             ],
             constants.ConvState.SelectHouse: [
                 CallbackQueryHandler(select_house_completed)
