@@ -17,7 +17,7 @@ from double_confirm import create_double_confirm
 from select_house import select_house_completed
 from status_select_house import create_status_select_house
 from set_timer_machine import set_timer_machine
-from set_duration import select_duration
+from select_duration import select_duration
 from convo_timeout import timeout_on_callback_query, timeout_on_message
 from config import config, read_dotenv
 from utils import with_house_context, with_deleted_previous_keyboards

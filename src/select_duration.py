@@ -4,14 +4,27 @@ from machine import Machine
 from config import config
 from telegram.ext import CallbackContext
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
+from utils import create_select_house_callback
+from commands.select import create_select_menu
 
-logger = logging.getLogger("set_duration")
+logger = logging.getLogger("select_duration")
+
+select_duration_global = None
 
 
 def select_duration(machines: dict[str, dict[str, Machine]]):
+    global select_duration_global
+    if select_duration_global:
+        return select_duration_global
+
+    select_menu = create_select_menu()
+
     async def select_duration_handler(update: Update, context: CallbackContext):
         query = update.callback_query
         await query.answer()
+
+        if query.data == constants.ConvState.SelectHouse:
+            return await create_select_house_callback(select_menu)(update, context)
 
         logger.info(query.data)
 
@@ -64,4 +77,5 @@ def select_duration(machines: dict[str, dict[str, Machine]]):
 
         return constants.ConvState.RequestConfirmSelect
 
+    select_duration_global = select_duration_handler
     return select_duration_handler
